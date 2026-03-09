@@ -1,0 +1,6 @@
+dimod 
+matplotlib 
+numpy 
+pandas 
+dwave-neal
+scipy
