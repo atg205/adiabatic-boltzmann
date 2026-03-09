@@ -4,4 +4,4 @@ Install:
 - `pip install -r requirements.txt`
 
 Run:
-- `python main.py` to train the model and plot the results.
+- `python src/main.py` to train the model and plot the results.
