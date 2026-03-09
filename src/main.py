@@ -5,7 +5,7 @@ from pathlib import Path
 
 # TODO: Import your implementations
 from model import FullyConnectedRBM, DWaveTopologyRBM
-from sampler import ClassicalSampler, DWaveSampler
+from sampler import ClassicalSampler,DimodSampler
 from encoder import Trainer, ExperimentRunner
 from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
 
@@ -94,7 +94,7 @@ def main():
     if args.sampler == 'classical':
         sampler = ClassicalSampler(method=args.sampling_method)
     else:
-        sampler = DWaveSampler()
+        sampler = DimodSampler()
     
     # 4. Build trainer config
     trainer_config = {

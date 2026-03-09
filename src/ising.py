@@ -47,6 +47,11 @@ class TransverseFieldIsing1D(IsingModel):
     """
     
     def local_energy(self, v: np.ndarray, psi_ratio_fn) -> float:
+        """
+        Parameters:
+        - v: current spin configuration (±1 for each spin)
+        - psi_ratio_fn: function that computes Ψ(v_flip) / Ψ(v)
+        """
         # Diagonal part: Ising coupling between neighbors
         E_diag = -sum([v[i]* v[i_n] 
                        for i in range(self.size) 
@@ -91,9 +96,6 @@ class TransverseFieldIsing2D(IsingModel):
         self.linear_size = size  # For 2D indexing
     
     def local_energy(self, v: np.ndarray, psi_ratio_fn) -> float:
-        """
-        IMPLEMENT THIS (similar to 1D, but with 4 neighbors per spin).
-        """
         E_diag = -sum([v[i]* v[i_n] 
                        for i in range(self.size) 
                        for i_n in self.get_neighbors(i)]) / 2
