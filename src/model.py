@@ -29,6 +29,11 @@ class RBM(ABC):
         pass
     
 
+    def logcosh(self,x):
+        # s always has real part >= 0
+        s = np.sign(x) * x
+        p = np.exp(-2 * s)
+        return s + np.log1p(p) - np.log(2)
 
 
     def log_psi(self, v: np.ndarray) -> float:
@@ -40,21 +45,16 @@ class RBM(ABC):
         Returns: scalar log(Ψ(v))
         
         """
-        def logcosh(x):
-            # s always has real part >= 0
-            s = np.sign(x) * x
-            p = np.exp(-2 * s)
-            return s + np.log1p(p) - np.log(2)
         
         first_term = (self.a @ v)/2
-        second_term = np.log(2)*self.n_hidden+sum([logcosh(self.b[j]+self.W.T[j]@v) for j in range(self.n_hidden)])
+        second_term = np.log(2)*self.n_hidden+sum([self.logcosh(self.b[j]+self.W.T[j]@v) for j in range(self.n_hidden)])
 
         return first_term + 0.5*second_term
-    
-    def psi_ratio(self, v: np.ndarray, flip_idx: int) -> float:
+   
+
+    def psi_ratio_old(self, v: np.ndarray, flip_idx: int) -> float:
         """
-        Compute Ψ(v_flip) / Ψ(v) when flipping spin at index flip_idx.
-        
+        Compute Ψ(v_flip) / Ψ(v) when flipping spin at index flip_idx. Optimized version don't compute psi twice
         v: current configuration
         flip_idx: which spin to flip (0 to n_visible-1)
         
@@ -63,8 +63,21 @@ class RBM(ABC):
         """
         v_flipped = np.copy(v)
         v_flipped[flip_idx]  *= -1
-        return np.exp(self.log_psi(v_flipped) - self.log_psi(v))
-    
+        return_value = np.exp(self.log_psi(v_flipped) - self.log_psi(v))
+
+        return return_value
+
+    def psi_ratio(self, v: np.ndarray, flip_idx: int) -> float:
+        vi = v[flip_idx] 
+        log_ratio_a = self.a[flip_idx] * (-2 * vi) / 2
+        theta = self.b + self.W.T @ v  
+        theta_flipped = theta - 2 * vi * self.W[flip_idx, :]
+
+        log_ratio_cosh = 0.5 * np.sum(self.logcosh(theta_flipped) - self.logcosh(theta))
+
+        return np.exp(log_ratio_a + log_ratio_cosh)
+
+
     def gradient_log_psi(self, v: np.ndarray) -> dict:
         """
         Compute ∂log(Ψ)/∂p for all parameters p.

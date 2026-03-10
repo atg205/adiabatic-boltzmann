@@ -59,7 +59,6 @@ class TransverseFieldIsing1D(IsingModel):
         
         # Off-diagonal part: transverse field
         E_off_diag = -self.h * sum([psi_ratio_fn(v,i) for i in range(self.size)])
-
         return E_diag + E_off_diag
     
     def exact_ground_energy(self) -> float:

@@ -36,16 +36,16 @@ def parse_arguments():
                         help='Number of hidden units (default: equal to visible)')
     
     # Sampling
-    parser.add_argument('--sampler', choices=['classical', 'dwave'], default='classical',
+    parser.add_argument('--sampler', choices=['custom', 'dimod'], default='dimod',
                         help='Sampling backend')
-    parser.add_argument('--sampling-method', choices=['metropolis', 'simulated_annealing'],
+    parser.add_argument('--sampling-method', choices=['metropolis', 'simulated_annealing', 'tabu'],
                         default='metropolis',
                         help='Classical sampling algorithm')
     parser.add_argument('--n-samples', type=int, default=1000,
                         help='Samples per iteration')
     
     # Training
-    parser.add_argument('--iterations', type=int, default=50,
+    parser.add_argument('--iterations', type=int, default=30,
                         help='Training iterations')
     parser.add_argument('--learning-rate', type=float, default=0.1,
                         help='Gradient step size')
@@ -91,10 +91,10 @@ def main():
         rbm = DWaveTopologyRBM(args.size, n_hidden)
     
     # 3. Instantiate sampler
-    if args.sampler == 'classical':
+    if args.sampler == 'custom':
         sampler = ClassicalSampler(method=args.sampling_method)
     else:
-        sampler = DimodSampler()
+        sampler = DimodSampler(method=args.sampling_method)
     
     # 4. Build trainer config
     trainer_config = {

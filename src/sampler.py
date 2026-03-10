@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from model import RBM
 import dimod
 import neal
-
+from dwave.samplers import TabuSampler
 class Sampler(ABC):
     """Abstract sampling interface."""
     
@@ -27,7 +27,7 @@ class ClassicalSampler(Sampler):
     """
     
     def __init__(self, method:str):
-        self.method = method # Can also be "simulated_annealing"
+        self.method = method
     
     def sample(self, rbm: RBM, n_samples: int, config: dict = None) -> np.ndarray:
         if config is None:
@@ -121,9 +121,15 @@ class ClassicalSampler(Sampler):
 
 
 class DimodSampler(Sampler):
-
+    def __init__(self, method:str):
+        self.method = method
+        
     def rbm_to_ising(self, rbm):
-         
+        """
+        Convert RBM parameters to Ising model parameters (J, h).
+        Args: 
+            rbm (RBM): An RBM instance
+        """
         Nv = rbm.n_visible
         Nh = rbm.n_hidden
 
@@ -145,15 +151,55 @@ class DimodSampler(Sampler):
         
         return quadratic, linear
 
-    def sample(self, rbm, n_samples: int, config: dict = None) -> np.ndarray:
+    def sample(self, rbm, n_samples: int, config: dict = {}) -> np.ndarray:
+        """
+        Sample from the RBM distribution using a classical/quantum sampler from the dimod library.
+        Args:
+            - rbm (RBM): An RBM instance
+            - n_samples (int): Number of samples to draw
+            - config (dict): Optional configuration for the sampler
+        """
         J,h = self.rbm_to_ising(rbm)
+        self.n_visible = rbm.n_visible
         bqm = dimod.BinaryQuadraticModel.from_ising(h, J, 0.0)
+        
+        if self.method == 'simulated_annealing':
+            return self.simulated_annealing(bqm, n_samples, config)
+        elif self.method == 'tabu':
+            return self.tabu_search(bqm, n_samples, config)
+        else:
+            raise ValueError(f"Unknown method: {self.method}")
+
+    def simulated_annealing(self, bqm, n_samples: int, config: dict = {}) -> np.ndarray:
+        """
+        Run simulated annealing using the neal library.
+
+        Args:
+            - bqm (dimod.BinaryQuadraticModel): The Ising model to sample from
+            - n_samples (int): Number of samples to draw
+            - config (dict): Optional configuration for the annealing schedule
+        """
         sampler = neal.SimulatedAnnealingSampler()
         sampleset = sampler.sample(bqm, num_reads=n_samples)
         
         samples = sampleset.record.sample
 
         # return visible spins only
-        return samples[:, :rbm.n_visible]
+        return samples[:, :self.n_visible]
+    
+    def tabu_search(self, bqm, n_samples: int, config: dict = {}) -> np.ndarray:
+        """
+        Run tabu search using the neal library.
 
+        Args:
+            - bqm (dimod.BinaryQuadraticModel): The Ising model to sample from
+            - n_samples (int): Number of samples to draw
+            - config (dict): Optional configuration for the tabu search
+        """
+        sampler = TabuSampler()
+        sampleset = sampler.sample(bqm, num_reads=n_samples)
+        
+        samples = sampleset.record.sample
 
+        # return visible spins only
+        return samples[:, :self.n_visible]
