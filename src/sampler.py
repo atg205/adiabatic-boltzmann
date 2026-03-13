@@ -162,17 +162,19 @@ class VeloxSampler(Sampler):
 
         with open("velox_token.txt", "r") as file:
             api_config.token = file.read().strip()
-        print(api_config.token)
-        print("init done")
 
     def sample(self, rbm, n_samples: int, config: dict = {}) -> np.ndarray:
+        self.n_visible = rbm.n_visible
         J, h = self.rbm_to_ising(rbm)
+        self.solver.parameters.num_rep = n_samples
         sampleset = self.solver.sample(h, J)
 
-        samples = sampleset.record.sample
-        self.n_visible = rbm.n_visible
-        # return visible spins only
-        return samples[:, : self.n_visible]
+        df = sampleset.to_pandas_dataframe()
+        df = df.loc[df.index.repeat(df["num_occurrences"])].reset_index(
+            drop=True
+        )  # expand
+        # return visible only
+        return df.loc[:, list(range(self.n_visible))].to_numpy()
 
 
 class DimodSampler(Sampler):

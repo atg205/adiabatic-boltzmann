@@ -137,9 +137,10 @@ def main():
     print(f"\nStarting training...")
     history = trainer.train()
 
-    # 6. Save results
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(exist_ok=True)
+    output_dir = Path(
+        f"{args.output_dir}/{args.size}/{args.sampler}/{args.sampling_method}"
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     results = {
         "config": vars(args),
@@ -159,6 +160,10 @@ def main():
     print(f"Final energy: {results['final_energy']:.6f}")
     print(f"Exact energy: {results['exact_energy']:.6f}")
     print(f"Error: {abs(results['final_energy'] - results['exact_energy']):.6f}")
+
+    # For plots
+    plot_dir = output_dir / "plots"
+    plot_dir.mkdir(parents=True, exist_ok=True)
 
     # 7. Plot if requested
     if args.visualize:
@@ -184,7 +189,7 @@ def main():
             plt.title("Energy Variance")
 
             plt.tight_layout()
-            plot_file = output_dir / f"plot_{args.model}_h{args.h}_rbm{args.rbm}.png"
+            plot_file = plot_dir / f"plot_{args.model}_h{args.h}_rbm{args.rbm}.png"
             plt.savefig(plot_file, dpi=150)
             plt.show()
             print(f"Plot saved to {plot_file}")
