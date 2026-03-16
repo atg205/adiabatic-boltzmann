@@ -19,9 +19,9 @@ class RBM(ABC):
 
         # Initialize weights to small random values
         # HINT: Look at initialization scales in the paper's methods
-        self.a = np.random.normal(0, 1, n_visible)
-        self.b = np.random.normal(0, 1, n_hidden)
-        self.W = np.random.normal(0, 1, (n_visible, n_hidden))
+        self.a = np.random.normal(0, 0.1, n_visible)
+        self.b = np.random.normal(0, 0.1, n_hidden)
+        self.W = np.random.normal(0, 0.1, (n_visible, n_hidden))
 
     @abstractmethod
     def get_connectivity_mask(self):
