@@ -4,6 +4,7 @@ import numpy as np
 
 
 def save_results(args, history, ising):
+    # Directory structure: results/size/sampler/sampling_method/
     output_dir = Path(
         f"{args.output_dir}/{args.size}/{args.sampler}/{args.sampling_method}"
     )
@@ -17,17 +18,30 @@ def save_results(args, history, ising):
         },
         "final_energy": history["energy"][-1],
         "exact_energy": ising.exact_ground_energy(),
+        "error": abs(history["energy"][-1] - ising.exact_ground_energy()),
     }
 
-    output_file = output_dir / f"result_{args.model}_h{args.h}_rbm{args.rbm}.json"
+    # Filename encodes every axis that varies in the sweep
+    output_file = output_dir / (
+        f"result"
+        f"_{args.model}"
+        f"_h{args.h}"
+        f"_rbm{args.rbm}"
+        f"_nh{args.n_hidden}"
+        f"_lr{args.learning_rate}"
+        f"_reg{args.regularization}"
+        f"_ns{args.n_samples}"
+        f"_seed{args.seed}"
+        f".json"
+    )
+
     with open(output_file, "w") as f:
         json.dump(results, f, indent=2)
 
-    print(f"\nResults saved to {output_file}")
-    print(f"Final energy: {results['final_energy']:.6f}")
-    print(f"Exact energy: {results['exact_energy']:.6f}")
-    print(f"Error: {abs(results['final_energy'] - results['exact_energy']):.6f}")
-
+    print(f"Saved  → {output_file}")
+    print(f"  Final energy : {results['final_energy']:.6f}")
+    print(f"  Exact energy : {results['exact_energy']:.6f}")
+    print(f"  Error        : {results['error']:.6f}")
     # For plots
     plot_dir = output_dir / "plots"
     plot_dir.mkdir(parents=True, exist_ok=True)
