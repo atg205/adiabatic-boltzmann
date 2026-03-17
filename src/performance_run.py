@@ -9,11 +9,11 @@ from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
 
 from argparse import Namespace
 
-sizes = [4, 8, 16, 32]
+sizes = [8, 16, 32]
 hs = [0.1, 0.5, 1.0, 2.0]
-rbms = ["full", "dwave"]
-sampler_methods = [("velox", "velox"), ("dimod", "simulated_annealing")]
-iterations = [10, 30, 100]
+rbms = ["full"]
+sampler_methods = [ ("dimod", "simulated_annealing")]
+iterations = [600]
 learning_rates = [0.0001]
 regularizations = [1e-6, 1e-5, 1e-4]
 n_samples = [100, 1000, 5000]
