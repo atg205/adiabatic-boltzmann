@@ -115,27 +115,6 @@ class Trainer:
         S += self.regularization * np.eye(S.shape[0])
 
         return S, F
-                # TODO: Compute S and F
-        M = D.shape[0]
-        mean_D = np.mean(D, axis=0)  # (n_params,)
-        mean_E = np.mean(local_energies)  # scalar
-        D_centered = D - mean_D  # (M, n_params)
-
-        S = (1 / M) * D_centered.T @ D_centered  # (n_params, n_params)
-        F = (1 / M) * D_centered.T @ local_energies  # (n_params,)
-
-        S += self.regularization * np.eye(S.shape[0])
-
-        return S, 2 * F
-        mean_D = np.mean(D)
-
-        mean_E = np.mean(local_energies)
-        S = (1 / M) * D.T @ D - np.outer(mean_D, mean_D)
-        F = (1 / M) * (local_energies.T @ D) - mean_E * mean_D
-
-        S += self.regularization * np.eye(S.shape[0])
-
-        return S, F
 
 
 class ExperimentRunner:
