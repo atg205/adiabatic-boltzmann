@@ -1,0 +1,57 @@
+Traceback (most recent call last):
+  File "/home/phanussek/adiabatic-boltzmann/src/performance_run.py", line 8, in <module>
+    from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
+  File "/home/phanussek/adiabatic-boltzmann/src/ising.py", line 3, in <module>
+    import netket as nk
+ModuleNotFoundError: No module named 'netket'
+An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+Traceback (most recent call last):
+  File "/home/phanussek/adiabatic-boltzmann/src/performance_run.py", line 8, in <module>
+    from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
+  File "/home/phanussek/adiabatic-boltzmann/src/ising.py", line 3, in <module>
+    import netket as nk
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/__init__.py", line 47, in <module>
+    from . import graph
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/graph/__init__.py", line 16, in <module>
+    from .graph import Graph, Edgeless, DoubledGraph, disjoint_union
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/graph/graph.py", line 20, in <module>
+    from netket.utils.group import Permutation, PermutationGroup
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/utils/group/__init__.py", line 16, in <module>
+    from netket.utils.group._group import FiniteGroup
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/utils/group/_group.py", line 31, in <module>
+    @struct.dataclass
+     ^^^^^^^^^^^^^^^^
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/utils/struct/dataclass.py", line 431, in dataclass
+    data_clz = dataclasses.dataclass(frozen=_frozen)(clz)
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/dataclasses.py", line 1432, in wrap
+    return _process_class(cls, init, repr, eq, order, unsafe_hash,
+                          frozen, match_args, kw_only, slots,
+                          weakref_slot)
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/dataclasses.py", line 1090, in _process_class
+    raise TypeError(f'{name!r} is a field but has no type annotation')
+TypeError: '__inverse_cache' is a field but has no type annotation
+Traceback (most recent call last):
+  File "/home/phanussek/adiabatic-boltzmann/src/performance_run.py", line 8, in <module>
+    from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
+  File "/home/phanussek/adiabatic-boltzmann/src/ising.py", line 3, in <module>
+    import netket as nk
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/__init__.py", line 47, in <module>
+    from . import graph
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/graph/__init__.py", line 16, in <module>
+    from .graph import Graph, Edgeless, DoubledGraph, disjoint_union
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/graph/graph.py", line 20, in <module>
+    from netket.utils.group import Permutation, PermutationGroup
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/utils/group/__init__.py", line 16, in <module>
+    from netket.utils.group._group import FiniteGroup
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/utils/group/_group.py", line 31, in <module>
+    @struct.dataclass
+     ^^^^^^^^^^^^^^^^
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/site-packages/netket/utils/struct/dataclass.py", line 431, in dataclass
+    data_clz = dataclasses.dataclass(frozen=_frozen)(clz)
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/dataclasses.py", line 1432, in wrap
+    return _process_class(cls, init, repr, eq, order, unsafe_hash,
+                          frozen, match_args, kw_only, slots,
+                          weakref_slot)
+  File "/home/phanussek/miniconda3/envs/test/lib/python3.14/dataclasses.py", line 1090, in _process_class
+    raise TypeError(f'{name!r} is a field but has no type annotation')
+TypeError: '__inverse_cache' is a field but has no type annotation

@@ -1,6 +1,5 @@
 import numpy as np
 from abc import ABC, abstractmethod
-import netket as nk
 
 
 class IsingModel(ABC):
@@ -70,7 +69,7 @@ class TransverseFieldIsing1D(IsingModel):
         E_off_diag = -self.h * sum([psi_ratio_fn(v, i) for i in range(self.size)])
         return E_diag + E_off_diag
 
-    def exact_ground_energy(self):
+    def exact_ground_energy_netket(self):
         N = self.size
         hilbert = nk.hilbert.Spin(s=0.5, N=N)
         ha = nk.operator.LocalOperator(hilbert)
@@ -87,7 +86,7 @@ class TransverseFieldIsing1D(IsingModel):
         vals, _ = eigsh(H_sparse, k=1, which="SA")
         return vals[0]
 
-    def exact_ground_energy_old(self) -> float:
+    def exact_ground_energy(self) -> float:
         """
         TASK 2: Implement exact solution.
         """
