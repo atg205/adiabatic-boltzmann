@@ -103,8 +103,19 @@ class Trainer:
             D.append(row)
         D = np.array(D)  # Shape: (M, n_params)
         M = D.shape[0]
+        mean_D = np.mean(D, axis=0)
+        mean_E = np.mean(local_energies)
 
-        # TODO: Compute S and F
+        D_centered = D - mean_D
+        E_centered = local_energies - mean_E
+
+        S = (D_centered.T @ D_centered) / M
+        F = (D_centered.T @ E_centered) / M
+
+        S += self.regularization * np.eye(S.shape[0])
+
+        return S, F
+                # TODO: Compute S and F
         M = D.shape[0]
         mean_D = np.mean(D, axis=0)  # (n_params,)
         mean_E = np.mean(local_energies)  # scalar
