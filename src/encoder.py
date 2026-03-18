@@ -59,9 +59,12 @@ class Trainer:
 
             local_energies = np.array(local_energies)
 
-            S, F = self._compute_sr_matrices(gradients_list, local_energies)
+            S, F = self._compute_sr_matrices(gradients_list, local_energies,iteration)
 
             x = np.linalg.solve(S, F)
+            x_norm = np.linalg.norm(x)
+            if x_norm > 0.1:            # max step size
+                x = x * 0.1 / x_norm
             w = self.rbm.get_weights()
             w_new = w - self.learning_rate * x
             self.rbm.set_weights(w_new)
@@ -84,7 +87,7 @@ class Trainer:
 
         return self.history
 
-    def _compute_sr_matrices(self, gradients_list, local_energies) -> tuple:
+    def _compute_sr_matrices(self, gradients_list, local_energies, iteration) -> tuple:
         """
         Returns: (S, F) where S is (n_params, n_params) and F is (n_params,)
         """
@@ -111,9 +114,14 @@ class Trainer:
 
         S = (D_centered.T @ D_centered) / M
         F = (D_centered.T @ E_centered) / M
-
-        S += self.regularization * np.eye(S.shape[0])
-
+        # Adaptive regularization — start high, decay toward target
+        reg_initial = 0.01          # start here
+        reg_final   = self.regularization   # decay toward this (e.g. 1e-4)
+        reg = reg_final + (reg_initial - reg_final) * (0.97 ** iteration)
+        S += reg * np.eye(S.shape[0])
+        eigvals = np.linalg.eigvalsh(S - self.regularization * np.eye(S.shape[0]))
+        print(f"  λ_min={eigvals[0]:.2e}  λ_max={eigvals[-1]:.2e}  "
+              f"n_zero={np.sum(eigvals < 1e-10)}/{len(eigvals)}")
         return S, F
 
 
