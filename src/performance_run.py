@@ -9,15 +9,15 @@ from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
 
 from argparse import Namespace
 
-sizes = [8, 16, 32]
-hs = [0.1, 0.5, 1.0, 2.0]
+sizes = [16, 32]
+hs = [0.1, 0.5, 2.0]
 rbms = ["full"]
 sampler_methods = [("dimod", "simulated_annealing")]
 iterations = [600]
 learning_rates = [1e-2, 1e-3, 1e-4]
-regularizations = [1e-6, 1e-5, 1e-4]
+regularizations = [1e-6, 1e-4]
 n_samples = [1000, 10000]
-seeds = [1, 42, 123]
+seeds = [1, 42]
 
 output_dir = "results/"
 
@@ -30,6 +30,7 @@ def run_experiment(args):
 
     # 2. Instantiate RBM
     n_hidden = args.n_hidden or args.size
+    args.n_hidden = n_hidden
     if args.rbm == "full":
         rbm = FullyConnectedRBM(args.size, n_hidden)
     else:

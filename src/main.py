@@ -109,6 +109,7 @@ def main():
 
     # 2. Instantiate RBM
     n_hidden = args.n_hidden or args.size
+    args.n_hidden = n_hidden
     if args.rbm == "full":
         rbm = FullyConnectedRBM(args.size, n_hidden)
     else:
