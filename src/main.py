@@ -56,7 +56,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--sampling-method",
-        choices=["metropolis", "simulated_annealing", "tabu"],
+        choices=["pegasus", "zephyr", "metropolis", "simulated_annealing", "tabu"],
         default="simulated_annealing",
         help="Classical sampling algorithm",
     )
@@ -122,6 +122,7 @@ def main():
         sampler = DimodSampler(method=args.sampling_method)
     elif args.sampler == "velox":
         sampler = VeloxSampler(method=args.sampling_method)
+
     # 4. Build trainer config
     trainer_config = {
         "learning_rate": args.learning_rate,

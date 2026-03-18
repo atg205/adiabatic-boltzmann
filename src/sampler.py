@@ -6,6 +6,8 @@ import neal
 from dwave.samplers import TabuSampler
 from veloxq_sdk import VeloxQSolver
 from veloxq_sdk.config import load_config, VeloxQAPIConfig
+from pathlib import Path
+import json
 
 
 class Sampler(ABC):
@@ -57,14 +59,21 @@ class ClassicalSampler(Sampler):
     Classical sampling via Metropolis-Hastings or Simulated Annealing.
     """
 
-    def __init__(self, method: str):
+    def __init__(self, method: str, n_warmup: int = 200, n_sweeps: int = 1):
+        """
+        method:   'metropolis' | 'simulated_annealing' | 'gibbs'
+        n_warmup: equilibration sweeps before collecting samples
+        n_sweeps: full sweeps (n_visible flip attempts) between each sample
+                  increase to 2-3 if acceptance rate drops below 0.2
+        """
         self.method = method
+        self.n_warmup = n_warmup
+        self.n_sweeps = n_sweeps
 
     def sample(self, rbm: RBM, n_samples: int, config: dict = None) -> np.ndarray:
         if config is None:
             config = {}
 
-        print(rbm)
         if self.method == "metropolis":
             return self._metropolis_hastings(rbm, n_samples, config)
         elif self.method == "simulated_annealing":
@@ -76,42 +85,57 @@ class ClassicalSampler(Sampler):
         self, rbm: RBM, n_samples: int, config: dict
     ) -> np.ndarray:
         """
-        Metropolis-Hastings sampling using spin flips.
+        Metropolis-Hastings sampling targeting |Ψ(v)|².
 
-        Parameters from config (with defaults):
-        - n_sweeps: int, equilibration steps (default ???)
-        - n_between: int, steps between samples (default ???)
+        Proposal: flip a single random spin.
+        Acceptance: min(1, |Ψ(v')/Ψ(v)|²)
+
+        One sweep = n_visible attempted flips at randomly chosen sites.
+
+        Parameters from config:
+        - n_warmup: equilibration sweeps (overrides __init__ value)
+        - n_sweeps: sweeps between collected samples (overrides __init__ value)
         """
-        print("metropolis")
-        n_visible = rbm.n_visible
-        n_sweeps = config.get("n_sweeps", 100)
-        n_between = config.get("n_between", 5)
-        print("----W------")
-        print(rbm.W.shape)
-        print("----a------")
-        print(rbm.a.shape)
-        print("----b")
-        print(rbm.b.shape)
-        # Initialize
-        v = (2 * np.random.randint(0, 2, n_visible) - 1).astype(float)
+        N = rbm.n_visible
+        n_warmup = config.get("n_warmup", self.n_warmup)
+        n_sweeps = config.get("n_sweeps", self.n_sweeps)
+        rng = np.random.default_rng()
+
+        v = rng.choice([-1.0, 1.0], size=N)
+
+        n_accepted = 0
+        n_proposed = 0
+
+        def sweep(v):
+            nonlocal n_accepted, n_proposed
+            for flip_idx in rng.integers(0, N, size=N):
+                ratio_sq = rbm.psi_ratio(v, flip_idx) ** 2
+                n_proposed += 1
+                if rng.random() < min(1.0, ratio_sq):
+                    v[flip_idx] *= -1
+                    n_accepted += 1
+            return v
+
+        # Warmup — equilibrate from random initial state
+        for _ in range(n_warmup):
+            sweep(v)
+
+        # Reset counters so acceptance rate reflects collection phase only
+        n_accepted = 0
+        n_proposed = 0
+
+        # Collect samples
         samples = []
-
-        # Equilibrium
-        spin_flip_array = np.random.randint(0, len(v), n_sweeps)
-        for spin_flip_idx in spin_flip_array:
-            ratio_squared = rbm.psi_ratio(v, spin_flip_idx) ** 2
-            if np.random.random() < min(1, ratio_squared):
-                v[spin_flip_idx] *= -1
-
-        # Sample collection
         for _ in range(n_samples):
-            spin_flips_array_between = np.random.randint(0, len(v), n_between)
-            for spin_flip_idx in spin_flips_array_between:
-                ratio_squared = rbm.psi_ratio(v, spin_flip_idx) ** 2
-                if np.random.random() < min(1, ratio_squared):
-                    v[spin_flip_idx] *= -1
+            for _ in range(n_sweeps):
+                sweep(v)
+            samples.append(v.copy())
 
-            samples.append(np.copy(v))
+        acceptance_rate = n_accepted / max(n_proposed, 1)
+        print(
+            f"  [MH]    acceptance={acceptance_rate:.3f}  "
+            f"unique={len(set(map(tuple, samples)))}/{n_samples}"
+        )
 
         return np.array(samples)
 
@@ -179,6 +203,10 @@ class VeloxSampler(Sampler):
 class DimodSampler(Sampler):
     def __init__(self, method: str):
         self.method = method
+        self.time_path = Path("time.json")
+        if not self.time_path.exists():
+            with self.time_path.open("w") as f:
+                json.dump({"time_ms": 0}, f)
 
     def sample(self, rbm, n_samples: int, config: dict = {}) -> np.ndarray:
         """
@@ -196,6 +224,12 @@ class DimodSampler(Sampler):
             return self.simulated_annealing(bqm, n_samples, config)
         elif self.method == "tabu":
             return self.tabu_search(bqm, n_samples, config)
+        elif self.method == "pegasus":
+            config["solver"] = "Advantage_system6.4"
+            return self.dwave(bqm, n_samples, config)
+        elif self.method == "zephyr":
+            config["solver"] = "Advantage2_system4.3"
+            return self.dwave(bqm, n_samples, config)
         else:
             raise ValueError(f"Unknown method: {self.method}")
 
@@ -212,7 +246,7 @@ class DimodSampler(Sampler):
         sampleset = sampler.sample(
             bqm,
             num_reads=n_samples,
-            beta_range=(0.01, 10.0),   # wider temperature range
+            beta_range=(0.01, 10.0),  # wider temperature range
             num_sweeps=1000,  # more sweeps per read
             beta_schedule_type="geometric",
         )
@@ -238,3 +272,57 @@ class DimodSampler(Sampler):
 
         # return visible spins only
         return samples[:, : self.n_visible]
+
+    def dwave(self, bqm, n_samples: int, config: dict = {}) -> np.ndarray:
+        """
+        Sample using a real D-Wave QPU via dwave-system.
+
+        Requires:
+            pip install dwave-system
+            dwave config create   # set up API token
+
+        Config keys:
+        - solver:          D-Wave solver name, e.g. "Advantage_system6.4"
+                           defaults to the best available solver
+        - annealing_time:  annealing time in µs (default 20)
+        - num_reads:       overrides n_samples if set
+        - chain_strength:  embedding chain strength (default auto)
+        """
+        try:
+            from dwave.system import DWaveSampler, EmbeddingComposite
+        except ImportError:
+            raise ImportError(
+                "dwave-system is required for D-Wave QPU sampling. "
+                "Install with: pip install dwave-system"
+            )
+
+        solver_name = config.get("solver", None)
+        annealing_time = config.get("annealing_time", 20)
+        num_reads = config.get("num_reads", n_samples)
+        chain_strength = config.get("chain_strength", None)
+
+        dwave_sampler = DWaveSampler(solver=solver_name)
+        sampler = EmbeddingComposite(dwave_sampler)
+
+        sample_kwargs = dict(
+            num_reads=num_reads,
+            annealing_time=annealing_time,
+        )
+        if chain_strength is not None:
+            sample_kwargs["chain_strength"] = chain_strength
+
+        sampleset = sampler.sample(bqm, **sample_kwargs)
+
+        samples = self._expand_sampleset(sampleset)
+
+        # D-Wave may return fewer samples than requested if chains break —
+        # pad by resampling with replacement if needed
+        if len(samples) < n_samples:
+            print(
+                f"  [DWave] got {len(samples)}/{n_samples} samples "
+                f"(chain breaks), padding by resampling"
+            )
+            idx = np.random.choice(len(samples), size=n_samples, replace=True)
+            samples = samples[idx]
+
+        return samples[:n_samples]

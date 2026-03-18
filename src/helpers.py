@@ -29,6 +29,7 @@ def save_results(args, history, ising):
         f"_reg{args.regularization}"
         f"_ns{args.n_samples}"
         f"_seed{args.seed}"
+        f"_iter{args.iterations}"
         f".json"
     )
 
