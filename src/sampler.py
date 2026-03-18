@@ -228,10 +228,22 @@ class DimodSampler(Sampler):
             config["solver"] = "Advantage_system6.4"
             return self.dwave(bqm, n_samples, config)
         elif self.method == "zephyr":
-            config["solver"] = "Advantage2_system4.3"
+            config["solver"] = "Advantage2_system1.12"
             return self.dwave(bqm, n_samples, config)
         else:
             raise ValueError(f"Unknown method: {self.method}")
+
+    def _log_access_time(self, access_time_us: float):
+        """Log the D-Wave access time to time.json.
+
+        Args:
+            access_time_ms (float): Access time in milliseconds.
+        """
+        with self.time_path.open("r") as f:
+            time_dict = json.load(f)
+        time_dict["time_ms"] += access_time_us * 1e-3
+        with self.time_path.open("w") as f:
+            json.dump(time_dict, f)
 
     def simulated_annealing(self, bqm, n_samples: int, config: dict = {}) -> np.ndarray:
         """
@@ -312,17 +324,10 @@ class DimodSampler(Sampler):
             sample_kwargs["chain_strength"] = chain_strength
 
         sampleset = sampler.sample(bqm, **sample_kwargs)
-
-        samples = self._expand_sampleset(sampleset)
-
-        # D-Wave may return fewer samples than requested if chains break —
-        # pad by resampling with replacement if needed
-        if len(samples) < n_samples:
-            print(
-                f"  [DWave] got {len(samples)}/{n_samples} samples "
-                f"(chain breaks), padding by resampling"
-            )
-            idx = np.random.choice(len(samples), size=n_samples, replace=True)
-            samples = samples[idx]
-
-        return samples[:n_samples]
+        self._log_access_time(sampleset.info["timing"]["qpu_access_time"])
+        df = sampleset.to_pandas_dataframe()
+        df = df.loc[df.index.repeat(df["num_occurrences"])].reset_index(
+            drop=True
+        )  # expand
+        # return visible only
+        return df.loc[:, list(range(self.n_visible))].to_numpy()
