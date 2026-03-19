@@ -59,7 +59,14 @@ class ClassicalSampler(Sampler):
     Classical sampling via Metropolis-Hastings or Simulated Annealing.
     """
 
-    def __init__(self, method: str, n_warmup: int = 200, n_sweeps: int = 1):
+    def __init__(
+        self,
+        method: str,
+        n_warmup: int = 200,
+        n_sweeps: int = 1,
+        T_initial: float = 5.0,
+        T_final: float = 1.0,
+    ):
         """
         method:   'metropolis' | 'simulated_annealing' | 'gibbs'
         n_warmup: equilibration sweeps before collecting samples
@@ -69,6 +76,9 @@ class ClassicalSampler(Sampler):
         self.method = method
         self.n_warmup = n_warmup
         self.n_sweeps = n_sweeps
+
+        self.T_initial = T_initial
+        self.T_final = T_final
 
     def sample(self, rbm: RBM, n_samples: int, config: dict = None) -> np.ndarray:
         if config is None:
@@ -139,38 +149,95 @@ class ClassicalSampler(Sampler):
 
         return np.array(samples)
 
-    def _simulated_annealing(self, rbm, n_samples: int, config: dict) -> np.ndarray:
+    def _simulated_annealing(
+        self, rbm: RBM, n_samples: int, config: dict
+    ) -> np.ndarray:
         """
-        Simulated Annealing: gradually lower temperature as you sample.
+        Simulated Annealing sampling targeting |Ψ(v)|².
 
-        Parameters from config:
-        - T_initial: starting temperature (default ???)
-        - T_final: final temperature (default ???)
-        - n_steps: total annealing steps (default ???)
+        Starts at high temperature (flat distribution, full exploration) and
+        cools geometrically. At each step accepts a spin flip with probability:
+
+            min(1, |Ψ(v')/Ψ(v)|^(2/T))
+
+        At T→∞ this accepts everything (random walk).
+        At T→0 this only accepts improvements (greedy).
+
+        Unlike the Metropolis sampler which targets the fixed distribution
+        |Ψ(v)|² at T=1, SA uses temperature to escape local modes early in
+        training when the RBM is poorly initialised, then sharpens toward
+        the true distribution as T→1 at the end of the schedule.
+
+        One sweep = n_visible attempted spin flips at randomly chosen sites.
+
+        Parameters from config (all optional):
+        - T_initial:  starting temperature  (default: 5.0)
+        - T_final:    ending temperature    (default: 1.0)
+                    set to 1.0 so the final samples are from |Ψ|² exactly
+        - n_warmup:   sweeps at T_initial before schedule starts (default: 50)
+        - n_sweeps:   sweeps between collected samples during cooling (default: 1)
         """
+        N = rbm.n_visible
+        T_initial = config.get(
+            "T_initial", self.T_initial if hasattr(self, "T_initial") else 5.0
+        )
+        T_final = config.get(
+            "T_final", self.T_final if hasattr(self, "T_final") else 1.0
+        )
+        n_warmup = config.get("n_warmup", self.n_warmup)
+        n_sweeps = config.get("n_sweeps", self.n_sweeps)
+        rng = np.random.default_rng()
 
-        T_initial = config.get("T_initial", 10)
-        T_final = config.get("T_final", 0.05)
-        n_steps = config.get("n_steps", int(1e5))
-        print("simulated annealing")
-        n_visible = rbm.n_visible
-        v = (2 * np.random.randint(0, 2, n_visible) - 1).astype(float)
-        samples = []
+        v = rng.choice([-1.0, 1.0], size=N)
 
-        # Create temperature schedule
+        # Geometric cooling schedule: T(step) = T_initial * (T_final/T_initial)^(step/n_steps)
+        n_steps = n_samples * n_sweeps
+
         def schedule(step: int) -> float:
-            return T_initial * (T_final / T_initial) ** (step / n_steps)  # Geometric
+            if T_initial == T_final:
+                return T_final
+            return T_initial * (T_final / T_initial) ** (step / max(n_steps - 1, 1))
 
-        # Equilibrium
-        spin_flip_array = np.random.randint(0, len(v), n_steps)
-        for step, spin_flip_idx in enumerate(spin_flip_array):
-            T = schedule(step)
-            ratio_squared = rbm.psi_ratio(v, spin_flip_idx) ** 2
-            if np.random.random() < min(1, ratio_squared ** (1 / T)):
-                v[spin_flip_idx] *= -1
+        n_accepted = 0
+        n_proposed = 0
 
-            if step % (n_steps // n_samples) == 0:
-                samples.append(np.copy(v))
+        def sweep(v, T):
+            nonlocal n_accepted, n_proposed
+            for flip_idx in rng.integers(0, N, size=N):
+                ratio_sq = rbm.psi_ratio(v, flip_idx) ** 2
+                n_proposed += 1
+                # At T=1: standard Metropolis acceptance = min(1, ratio²)
+                # At T>1: acceptance = min(1, ratio^(2/T)) — flatter, more exploratory
+                accept_prob = min(1.0, ratio_sq ** (1.0 / T))
+                if rng.random() < accept_prob:
+                    v[flip_idx] *= -1
+                    n_accepted += 1
+            return v
+
+        # Warmup at T_initial — equilibrate before cooling
+        for _ in range(n_warmup):
+            sweep(v, T_initial)
+
+        n_accepted = 0
+        n_proposed = 0
+
+        # Collect samples while cooling
+        samples = []
+        step = 0
+        for _ in range(n_samples):
+            for _ in range(n_sweeps):
+                T = schedule(step)
+                sweep(v, T)
+                step += 1
+            samples.append(v.copy())
+
+        acceptance_rate = n_accepted / max(n_proposed, 1)
+        T_now = schedule(step - 1)
+        print(
+            f"  [SA]    acceptance={acceptance_rate:.3f}  "
+            f"T: {T_initial:.2f}→{T_now:.2f}  "
+            f"unique={len(set(map(tuple, samples)))}/{n_samples}"
+        )
 
         return np.array(samples)
 
