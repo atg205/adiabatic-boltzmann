@@ -1,50 +1,106 @@
-import numpy as np
+"""
+Performance benchmark run.
+
+Sweeps over:
+  - sizes:           16, 32, 64
+  - learning rates:  0.1, 0.01
+  - samplers:        custom/metropolis, dimod/simulated_annealing, dimod/pegasus
+  - seeds:           1, 42
+
+Fixed:
+  - model:           1D TFIM, h=0.5
+  - rbm:             FullyConnectedRBM, n_hidden = N
+  - n_samples:       1000
+  - regularization:  1e-3
+  - n_iterations:    300
+
+D-Wave budget guard:
+  QPU access time is logged to time.json (in milliseconds by DimodSampler).
+  Before each D-Wave experiment, we check the accumulated time and abort
+  the entire D-Wave sweep if more than 20 minutes (1_200_000 ms) have been used.
+"""
+
+import json
 import itertools
+import numpy as np
+from argparse import Namespace
+from pathlib import Path
 
 from helpers import save_results
-from model import FullyConnectedRBM, DWaveTopologyRBM
-from sampler import ClassicalSampler, DimodSampler, VeloxSampler
+from model import FullyConnectedRBM
+from sampler import ClassicalSampler, DimodSampler
 from encoder import Trainer
-from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
+from ising import TransverseFieldIsing1D
 
-from argparse import Namespace
+# ---------------------------------------------------------------------------
+# Fixed hyperparameters
+# ---------------------------------------------------------------------------
 
-sizes = [16, 32]
-hs = [0.1, 0.5, 2.0]
-rbms = ["full"]
-sampler_methods = [("custom", "simulated_annealing")]
-iterations = [600]
-learning_rates = [1e-2, 1e-3, 1e-4]
-regularizations = [1e-6, 1e-4]
-n_samples = [1000, 10000]
-seeds = [1, 42]
+SIZES = [16, 32, 64]
+H = 0.5
+LEARNING_RATES = [0.1, 0.01]
+SEEDS = [1, 42]
+N_SAMPLES = 1000
+REGULARIZATION = 1e-3
+N_ITERATIONS = 300
+OUTPUT_DIR = "results/"
 
-output_dir = "results/"
+SAMPLER_METHODS = [
+    ("custom", "metropolis"),
+    ("dimod", "simulated_annealing"),
+    ("dimod", "pegasus"),
+]
+
+# D-Wave QPU budget: abort remaining D-Wave experiments after this
+DWAVE_BUDGET_MS = 20 * 60 * 1000  # 20 minutes in milliseconds
+DWAVE_TIME_FILE = Path("time.json")
+DWAVE_SAMPLERS = {"pegasus", "zephyr"}  # method names that hit the QPU
 
 
-def run_experiment(args):
+# ---------------------------------------------------------------------------
+# QPU time helpers
+# ---------------------------------------------------------------------------
+
+
+def read_qpu_time_ms() -> float:
+    """Return accumulated QPU access time in milliseconds from time.json."""
+    if not DWAVE_TIME_FILE.exists():
+        return 0.0
+    with DWAVE_TIME_FILE.open("r") as f:
+        return float(json.load(f).get("time_ms", 0.0))
+
+
+def qpu_budget_exceeded() -> bool:
+    used = read_qpu_time_ms()
+    if used >= DWAVE_BUDGET_MS:
+        used_min = used / 60_000
+        print(
+            f"\n[QPU BUDGET] Accumulated QPU time {used_min:.2f} min "
+            f">= limit {DWAVE_BUDGET_MS / 60_000:.0f} min. "
+            "Skipping remaining D-Wave experiments."
+        )
+        return True
+    return False
+
+
+# ---------------------------------------------------------------------------
+# Single experiment
+# ---------------------------------------------------------------------------
+
+
+def run_experiment(args: Namespace) -> None:
     np.random.seed(args.seed)
 
-    # 1. Instantiate Ising model
     ising = TransverseFieldIsing1D(args.size, args.h)
+    rbm = FullyConnectedRBM(args.size, args.n_hidden)
 
-    # 2. Instantiate RBM
-    n_hidden = args.n_hidden or args.size
-    args.n_hidden = n_hidden
-    if args.rbm == "full":
-        rbm = FullyConnectedRBM(args.size, n_hidden)
-    else:
-        rbm = DWaveTopologyRBM(args.size, n_hidden)
-
-    # 3. Instantiate sampler
     if args.sampler == "custom":
         sampler = ClassicalSampler(method=args.sampling_method)
     elif args.sampler == "dimod":
         sampler = DimodSampler(method=args.sampling_method)
-    elif args.sampler == "velox":
-        sampler = VeloxSampler(method=args.sampling_method)
+    else:
+        raise ValueError(f"Unknown sampler: {args.sampler}")
 
-    # 4. Build trainer config
     trainer_config = {
         "learning_rate": args.learning_rate,
         "n_iterations": args.iterations,
@@ -52,42 +108,68 @@ def run_experiment(args):
         "regularization": args.regularization,
     }
 
-    # 5. Create trainer and run
     trainer = Trainer(rbm, ising, sampler, trainer_config)
     history = trainer.train()
     save_results(args, history, ising)
 
 
+# ---------------------------------------------------------------------------
+# Main sweep
+# ---------------------------------------------------------------------------
+
 if __name__ == "__main__":
-    for size, h, rbm, (
-        sampler,
-        sampling_method,
-    ), iteration, lr, reg, n_sample, seed in itertools.product(
-        sizes,
-        hs,
-        rbms,
-        sampler_methods,
-        iterations,
-        learning_rates,
-        regularizations,
-        n_samples,
-        seeds,
+    used_min = read_qpu_time_ms() / 60_000
+    print(
+        f"QPU time budget: {DWAVE_BUDGET_MS / 60_000:.0f} min total  |  already used: {used_min:.2f} min"
+    )
+    if qpu_budget_exceeded():
+        print(
+            "Budget already exceeded before run started. No D-Wave experiments will run."
+        )
+
+    total = len(SIZES) * len(LEARNING_RATES) * len(SAMPLER_METHODS) * len(SEEDS)
+    done = 0
+
+    for size, lr, (sampler, sampling_method), seed in itertools.product(
+        SIZES, LEARNING_RATES, SAMPLER_METHODS, SEEDS
     ):
-        for n_hidden in [size, 2 * size]:
-            args = Namespace(
-                model="1d",
-                size=size,
-                h=h,
-                rbm=rbm,
-                n_hidden=n_hidden,
-                sampler=sampler,
-                sampling_method=sampling_method,
-                iterations=iteration,
-                learning_rate=lr,
-                regularization=reg,
-                n_samples=n_sample,
-                output_dir=output_dir,
-                seed=seed,
-                visualize=False,
-            )
+        # Check QPU budget before every D-Wave experiment
+        is_dwave = sampling_method in DWAVE_SAMPLERS
+        if is_dwave and qpu_budget_exceeded():
+            skipped = total - done
+            print(f"  Skipping {skipped} remaining D-Wave experiments.")
+            break
+
+        args = Namespace(
+            model="1d",
+            size=size,
+            h=H,
+            rbm="full",
+            n_hidden=size,  # n_hidden = N
+            sampler=sampler,
+            sampling_method=sampling_method,
+            iterations=N_ITERATIONS,
+            learning_rate=lr,
+            regularization=REGULARIZATION,
+            n_samples=N_SAMPLES,
+            output_dir=OUTPUT_DIR,
+            seed=seed,
+            visualize=False,
+        )
+
+        used_min = read_qpu_time_ms() / 60_000
+        print(
+            f"\n[{done + 1}/{total}] "
+            f"N={size} lr={lr} {sampler}/{sampling_method} seed={seed}"
+            + (f"  QPU used={used_min:.2f}min" if is_dwave else "")
+        )
+
+        try:
             run_experiment(args)
+        except Exception as e:
+            print(f"  ERROR: {e} — skipping this experiment")
+
+        done += 1
+
+    print(f"\nDone. {done}/{total} experiments completed.")
+    print(f"Total QPU time used: {read_qpu_time_ms() / 60_000:.2f} min")
