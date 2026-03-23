@@ -42,7 +42,7 @@ def main():
 
     trainer_config = {
         "learning_rate": args.lr,
-        "n_iterations": 300,
+        "n_iterations": 200,
         "n_samples": 1000,
         "regularization": 1e-3,
     }
