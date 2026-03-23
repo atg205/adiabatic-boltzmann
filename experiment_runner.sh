@@ -10,7 +10,7 @@ set -euo pipefail
 # Configuration
 # ---------------------------------------------------------------------------
 
-SKIP_FIRST_N=25
+SKIP_FIRST_N=29
 OUTPUT_DIR="results/"
 LOG_FILE="benchmark.log"
 SCRIPT="src/single_experiment.py"
