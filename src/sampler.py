@@ -277,6 +277,8 @@ class DimodSampler(Sampler):
             with self.time_path.open("w") as f:
                 json.dump({"time_ms": 0}, f)
 
+        self._embedding_cache: dict = {}
+
     def sample(self, rbm, n_samples: int, config: dict = {}) -> np.ndarray:
         """
         Sample from the RBM distribution using a classical/quantum sampler from the dimod library.
@@ -363,40 +365,77 @@ class DimodSampler(Sampler):
         annealing_time = config.get("annealing_time", 20)
         num_reads = config.get("num_reads", n_samples)
         chain_strength = config.get("chain_strength", None)
+        cache_key = (self.n_visible, solver_name)
 
-        dwave_sampler = DWaveSampler(solver=solver_name)
+        # ── Build or retrieve cached composite ───────────────────────────────
+        if cache_key not in self._embedding_cache:
+            dwave_sampler = DWaveSampler(solver=solver_name)
 
-        # Use trivial identity embedding if the RBM was built from this solver's
-        # hardware graph — avoids minorminer entirely, no chains needed
-        if rbm is not None and isinstance(rbm, DWaveTopologyRBM):
-            assert rbm._qubit_mapping is not None
-            # Invert mapping: logical -> [physical]  (one qubit per logical variable)
-            identity_embedding = {
-                logical: [phys] for phys, logical in rbm._qubit_mapping.items()
-            }
-            sampler = FixedEmbeddingComposite(dwave_sampler, identity_embedding)
-            sample_kwargs = dict(
-                num_reads=num_reads,
-                annealing_time=annealing_time,
-                answer_mode="raw",
-                auto_scale=False,  # sample from intended distribution, not rescaled
-            )
+            if rbm is not None and isinstance(rbm, DWaveTopologyRBM):
+                # Trivial identity embedding — no minorminer needed
+                assert rbm._qubit_mapping is not None, (
+                    "DWaveTopologyRBM must be built from a solver to use "
+                    "trivial embedding. rbm._qubit_mapping is None."
+                )
+                identity_embedding = {
+                    logical: [phys] for phys, logical in rbm._qubit_mapping.items()
+                }
+                composite = FixedEmbeddingComposite(dwave_sampler, identity_embedding)
+                print(
+                    f"  [embedding] Trivial identity embedding cached for {cache_key}."
+                )
+
+            else:
+                # Find embedding once with minorminer, then fix it
+                print(
+                    f"  [embedding] Running minorminer for {cache_key} — this may take a moment..."
+                )
+                import minorminer
+
+                embedding = minorminer.find_embedding(
+                    list(bqm.quadratic.keys()),
+                    dwave_sampler.edgelist,
+                )
+                if not embedding:
+                    raise RuntimeError(
+                        f"minorminer failed to find an embedding for "
+                        f"n_visible={self.n_visible} on solver '{solver_name}'."
+                    )
+                composite = FixedEmbeddingComposite(dwave_sampler, embedding)
+                print(f"  [embedding] Embedding found and cached for {cache_key}.")
+
+            self._embedding_cache[cache_key] = composite
+
         else:
-            # minorminer embedding
-            sampler = EmbeddingComposite(dwave_sampler)
-            sample_kwargs = dict(num_reads=num_reads, annealing_time=annealing_time)
-            if chain_strength is not None:
-                sample_kwargs["chain_strength"] = chain_strength
+            composite = self._embedding_cache[cache_key]
 
+        # ── Build sample kwargs ───────────────────────────────────────────────
+        is_trivial = (
+            rbm is not None
+            and isinstance(rbm, DWaveTopologyRBM)
+            and rbm._qubit_mapping is not None
+        )
+
+        sample_kwargs = dict(
+            num_reads=num_reads,
+            annealing_time=annealing_time,
+            answer_mode="raw",
+            auto_scale=True,
+        )
+
+        # chain_strength only applies when there are actual chains
+        if not is_trivial and chain_strength is not None:
+            sample_kwargs["chain_strength"] = chain_strength
+
+        # ── Sample with retries ───────────────────────────────────────────────
         MAX_DWAVE_RETRIES = 3
-
         success = False
         tries = 0
 
         while not success and tries < MAX_DWAVE_RETRIES:
             tries += 1
             try:
-                sampleset = sampler.sample(bqm, **sample_kwargs)
+                sampleset = composite.sample(bqm, **sample_kwargs)
                 access_time_us = sampleset.info["timing"]["qpu_access_time"]
                 self._log_access_time(access_time_us * tries)
                 success = True
@@ -404,14 +443,26 @@ class DimodSampler(Sampler):
                 print(
                     f"  D-Wave sampling attempt {tries}/{MAX_DWAVE_RETRIES} failed: {e}"
                 )
+                if tries < MAX_DWAVE_RETRIES:
+                    # Invalidate cache — composite may have stale connections after failure
+                    del self._embedding_cache[cache_key]
+                    dwave_sampler = DWaveSampler(solver=solver_name)
+                    composite = (
+                        FixedEmbeddingComposite(
+                            dwave_sampler,
+                            self._embedding_cache.get(cache_key, composite).embedding,
+                        )
+                        if cache_key in self._embedding_cache
+                        else composite
+                    )
+                    # Rebuild from scratch on next cache miss
+                    self._embedding_cache.pop(cache_key, None)
 
         if not success:
             raise RuntimeError(
                 f"D-Wave sampling failed after {MAX_DWAVE_RETRIES} attempts."
             )
 
-        # import dwave.inspector
-        # dwave.inspector.show(sampleset)
         df = sampleset.to_pandas_dataframe()
         df = df.loc[df.index.repeat(df["num_occurrences"])].reset_index(drop=True)
         return df.loc[:, list(range(self.n_visible))].to_numpy()

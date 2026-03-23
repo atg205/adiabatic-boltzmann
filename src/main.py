@@ -56,7 +56,14 @@ def parse_arguments():
     )
     parser.add_argument(
         "--sampling-method",
-        choices=["pegasus", "zephyr", "metropolis", "simulated_annealing", "tabu"],
+        choices=[
+            "pegasus",
+            "zephyr",
+            "metropolis",
+            "velox",
+            "simulated_annealing",
+            "tabu",
+        ],
         default="simulated_annealing",
         help="Classical sampling algorithm",
     )
