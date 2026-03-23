@@ -10,14 +10,14 @@ set -euo pipefail
 # Configuration
 # ---------------------------------------------------------------------------
 
-SKIP_FIRST_N=29
+SKIP_FIRST_N=0
 OUTPUT_DIR="results/"
 LOG_FILE="benchmark.log"
 SCRIPT="src/single_experiment.py"
 
 SIZES=(16 32 64)
 LEARNING_RATES=(0.1 0.01)
-SAMPLERS=("custom:metropolis" "dimod:simulated_annealing" "dimod:pegasus")
+SAMPLERS=("dimod:zephyr")
 SEEDS=(1 42)
 
 DWAVE_BUDGET_MS=1200000 # 20 minutes in milliseconds
