@@ -15,7 +15,8 @@ OUTPUT_DIR="results/"
 LOG_FILE="benchmark.log"
 SCRIPT="src/single_experiment.py"
 
-SIZES=(16 32 64)
+SIZES=(4 6 8)
+
 LEARNING_RATES=(0.1 0.01)
 SAMPLERS=("custom:metropolis" "velox:velox")
 SEEDS=(1 42)
@@ -143,6 +144,7 @@ for size in "${SIZES[@]}"; do
             --method "$method" \
             --seed "$seed" \
             --output-dir "$OUTPUT_DIR" \
+            --model "2d" \
             2>&1 | tee -a "$LOG_FILE"
 
           exit_code=${PIPESTATUS[0]}

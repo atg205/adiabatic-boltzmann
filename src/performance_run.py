@@ -35,13 +35,13 @@ from helpers import save_results
 from model import FullyConnectedRBM
 from sampler import ClassicalSampler, DimodSampler, VeloxSampler
 from encoder import Trainer
-from ising import TransverseFieldIsing1D
+from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
 
 # ---------------------------------------------------------------------------
 # Fixed hyperparameters
 # ---------------------------------------------------------------------------
 
-SIZES = [16, 32, 64]
+SIZES = [4, 6, 8]
 H = 0.5
 LEARNING_RATES = [0.1, 0.01]
 SEEDS = [1, 42]
@@ -53,11 +53,11 @@ OUTPUT_DIR = "results/"
 SAMPLER_METHODS = [
     ("custom", "metropolis"),
     ("dimod", "simulated_annealing"),
-    ("dimod", "zephyr"),
+    ("velox", "velox"),
 ]
 
 # Set to N to skip the first N experiments in sweep order (0 = no skip)
-SKIP_FIRST_N = 5
+SKIP_FIRST_N = 0
 
 # D-Wave QPU budget — cumulative across all sessions, never reset
 DWAVE_BUDGET_MS = 20 * 60 * 1000  # 20 minutes in milliseconds
@@ -101,9 +101,14 @@ def qpu_budget_exceeded() -> bool:
 def run_experiment(args: Namespace) -> bool:
     """Run a single experiment. Returns True on success, False on failure."""
     np.random.seed(args.seed)
+    n_visible = args.size if args.model == "1d" else args.size**2
+    # 1. Instantiate Ising model
+    if args.model == "1d":
+        ising = TransverseFieldIsing1D(args.size, args.h)
+    elif args.model == "2d":
+        ising = TransverseFieldIsing2D(args.size, args.h)
 
-    ising = TransverseFieldIsing1D(args.size, args.h)
-    rbm = FullyConnectedRBM(args.size, args.n_hidden)
+    rbm = FullyConnectedRBM(n_visible, args.n_hidden)
 
     if args.sampler == "custom":
         sampler = ClassicalSampler(method=args.sampling_method)
@@ -119,6 +124,7 @@ def run_experiment(args: Namespace) -> bool:
         "n_iterations": args.iterations,
         "n_samples": args.n_samples,
         "regularization": args.regularization,
+        "stop_at_convergence": False,
     }
 
     try:

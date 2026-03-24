@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
 Plot convergence to exact ground state energy.
-One plot per (N, h) combination showing how all methods converge to the exact ground state.
+One plot per (N, h, RBM) combination showing how all methods converge to the exact ground state.
+Additional comparison plot showing different RBMs for a given (N, h).
+
+Plots are saved organized by RBM type in plots/{rbm}/ directories.
 """
 
 import json
@@ -13,6 +16,7 @@ import subprocess
 import sys
 
 RESULTS_DIR = Path("results")
+PLOTS_DIR = Path("plots")
 
 def compute_exact_energy(N, h):
     """Compute exact ground state energy using Bethe ansatz analytical solution."""
@@ -36,7 +40,7 @@ def compute_exact_energy(N, h):
         return None
 
 def load_results(results_dir=RESULTS_DIR):
-    """Load all result files organized by (N, h) and method."""
+    """Load all result files organized by (N, h, RBM) and method."""
     results = defaultdict(lambda: defaultdict(list))
     
     for json_file in results_dir.rglob("*.json"):
@@ -47,12 +51,14 @@ def load_results(results_dir=RESULTS_DIR):
             config = data["config"]
             N = config["size"]
             h = config["h"]
+            rbm = config["rbm"]
             sampler = config["sampler"]
             sampling_method = config["sampling_method"]
             seed = config["seed"]
             
             method_name = f"{sampler}/{sampling_method}"
-            results[(N, h)][method_name].append({
+            # Key now includes RBM type
+            results[(N, h, rbm)][method_name].append({
                 "data": data,
                 "config": config,
                 "seed": seed,
@@ -64,11 +70,12 @@ def load_results(results_dir=RESULTS_DIR):
 
 def plot_convergence_to_exact(results):
     """
-    Create one plot per (N, h) combo.
+    Create one plot per (N, h, rbm) combo.
     Each plot shows all sampling methods converging to the exact ground state.
+    Saves plots in plots/{rbm}/ directory.
     """
     
-    # Get unique (N, h) combinations
+    # Get unique (N, h, rbm) combinations
     combos = sorted(results.keys())
     
     # Color palette for different methods
@@ -82,18 +89,18 @@ def plot_convergence_to_exact(results):
     
     figs = []
     
-    for N, h in combos:
+    for N, h, rbm in combos:
         # Compute exact energy per spin
         print(f"Computing exact ground state energy for N={N}, h={h}...")
         exact_E_per_spin = compute_exact_energy(N, h)
         
         if exact_E_per_spin is None:
-            print(f"  Skipping N={N}, h={h} - could not compute exact energy")
+            print(f"  Skipping N={N}, h={h}, RBM={rbm} - could not compute exact energy")
             continue
         
-        print(f"  Exact energy per spin: {exact_E_per_spin:.6f}")
+        print(f"  Exact energy per spin: {exact_E_per_spin:.6f} [RBM={rbm}]")
         
-        methods_data = results[(N, h)]
+        methods_data = results[(N, h, rbm)]
         
         # Create figure with 2 subplots: energy and delta
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
@@ -149,7 +156,7 @@ def plot_convergence_to_exact(results):
         ax1.set_xscale("log")
         ax1.set_xlabel("# iterations", fontsize=12)
         ax1.set_ylabel("Energy per spin", fontsize=12)
-        ax1.set_title(f"Convergence to Ground State (N={N}, h={h})", fontsize=14, fontweight='bold')
+        ax1.set_title(f"Convergence (N={N}, h={h}, RBM={rbm})", fontsize=14, fontweight='bold')
         ax1.grid(True, alpha=0.3, which='both')
         ax1.legend(fontsize=10, loc='best')
         
@@ -157,35 +164,154 @@ def plot_convergence_to_exact(results):
         ax2.set_xscale("log")
         ax2.set_xlabel("# iterations", fontsize=12)
         ax2.set_ylabel("Δ E per spin = |E - E_exact|", fontsize=12)
-        ax2.set_title(f"Error to Ground State (N={N}, h={h})", fontsize=14, fontweight='bold')
+        ax2.set_title(f"Error to Ground State (N={N}, h={h}, RBM={rbm})", fontsize=14, fontweight='bold')
         ax2.grid(True, alpha=0.3, which='both')
         ax2.legend(fontsize=10, loc='best')
         
         plt.tight_layout()
         
-        filename = f"convergence_N{N}_h{h}.png"
+        # Create directory for this RBM type if it doesn't exist
+        rbm_dir = PLOTS_DIR / rbm
+        rbm_dir.mkdir(parents=True, exist_ok=True)
+        
+        filename = rbm_dir / f"convergence_N{N}_h{h}_rbm{rbm}.png"
         plt.savefig(filename, dpi=150, bbox_inches='tight')
         print(f"Saved: {filename}")
-        figs.append((filename, fig))
+        figs.append((str(filename), fig))
+        plt.close(fig)
+    
+    return figs
+
+def plot_rbm_comparison(results):
+    """
+    Create comparison plots for different RBMs at the same (N, h).
+    Shows how different RBMs perform relative to each other.
+    Saves in plots/comparisons/ directory.
+    """
+    # Group by (N, h) to see which RBMs are available
+    nh_groups = defaultdict(list)
+    for N, h, rbm in results.keys():
+        nh_groups[(N, h)].append(rbm)
+    
+    # Color palette for different methods
+    method_colors = {
+        "custom/metropolis": "#1f77b4",
+        "dimod/pegasus": "#ff7f0e",
+        "dimod/simulated_annealing": "#2ca02c",
+        "dimod/zephyr": "#d62728",
+        "velox/velox": "#9467bd",
+    }
+    
+    figs = []
+    
+    # Create comparisons directory
+    comp_dir = PLOTS_DIR / "comparisons"
+    comp_dir.mkdir(parents=True, exist_ok=True)
+    
+    for (N, h), rbm_list in nh_groups.items():
+        if len(rbm_list) < 2:
+            continue  # Skip if only one RBM type
+        
+        exact_E_per_spin = compute_exact_energy(N, h)
+        if exact_E_per_spin is None:
+            continue
+        
+        print(f"\nCreating RBM comparison plot for N={N}, h={h}")
+        print(f"  Available RBMs: {rbm_list}")
+        
+        # Create figure with subplots for each RBM
+        fig, axes = plt.subplots(len(rbm_list), 2, figsize=(16, 5*len(rbm_list)))
+        if len(rbm_list) == 1:
+            axes = axes.reshape(1, -1)
+        
+        for idx, rbm in enumerate(sorted(rbm_list)):
+            ax1, ax2 = axes[idx, 0], axes[idx, 1]
+            methods_data = results[(N, h, rbm)]
+            
+            for method_name in sorted(methods_data.keys()):
+                runs = methods_data[method_name]
+                all_energies = []
+                min_len = float('inf')
+                
+                for run in runs:
+                    energy = run["data"]["history"]["energy"]
+                    all_energies.append(energy)
+                    min_len = min(min_len, len(energy))
+                
+                if all_energies and min_len > 0:
+                    all_energies = [e[:min_len] for e in all_energies]
+                    mean_energy = np.mean(all_energies, axis=0)
+                    std_energy = np.std(all_energies, axis=0)
+                    iterations = np.arange(len(mean_energy))
+                    
+                    mean_energy_per_spin = mean_energy / N
+                    std_energy_per_spin = std_energy / N
+                    
+                    delta = np.abs(mean_energy_per_spin - exact_E_per_spin)
+                    delta_std = std_energy_per_spin
+                    
+                    color = method_colors.get(method_name, None)
+                    
+                    # Left: Energy
+                    ax1.plot(iterations, mean_energy_per_spin, label=method_name, 
+                            color=color, linewidth=2, alpha=0.8)
+                    ax1.fill_between(iterations, 
+                                   mean_energy_per_spin - std_energy_per_spin, 
+                                   mean_energy_per_spin + std_energy_per_spin, 
+                                   color=color, alpha=0.15)
+                    
+                    # Right: Delta
+                    ax2.semilogy(iterations, delta, label=method_name, 
+                               color=color, linewidth=2, alpha=0.8)
+                    ax2.fill_between(iterations, 
+                                   delta - delta_std, 
+                                   delta + delta_std, 
+                                   color=color, alpha=0.15)
+            
+            # Add exact energy line
+            ax1.axhline(y=exact_E_per_spin, color='black', linestyle='--', 
+                       linewidth=2.5, label=f'Exact: {exact_E_per_spin:.6f}', zorder=10)
+            
+            # Configure subplots
+            ax1.set_xscale("log")
+            ax1.set_xlabel("# iterations", fontsize=11)
+            ax1.set_ylabel("Energy per spin", fontsize=11)
+            ax1.set_title(f"RBM={rbm} - Convergence", fontsize=12, fontweight='bold')
+            ax1.grid(True, alpha=0.3, which='both')
+            ax1.legend(fontsize=9, loc='best')
+            
+            ax2.set_xscale("log")
+            ax2.set_xlabel("# iterations", fontsize=11)
+            ax2.set_ylabel("Δ E per spin", fontsize=11)
+            ax2.set_title(f"RBM={rbm} - Error", fontsize=12, fontweight='bold')
+            ax2.grid(True, alpha=0.3, which='both')
+            ax2.legend(fontsize=9, loc='best')
+        
+        plt.tight_layout()
+        
+        filename = comp_dir / f"rbm_comparison_N{N}_h{h}.png"
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+        print(f"Saved: {filename}")
+        figs.append((str(filename), fig))
         plt.close(fig)
     
     return figs
 
 def print_summary(results):
-    """Print summary statistics."""
+    """Print summary statistics grouped by (N, h, RBM)."""
     print("\n" + "="*80)
     print("RESULTS SUMMARY (PER SPIN)")
     print("="*80)
     
-    for N, h in sorted(results.keys()):
-        print(f"\n(N={N}, h={h}):")
+    for N, h, rbm in sorted(results.keys()):
+        print(f"\n(N={N}, h={h}, RBM={rbm}):")
         
         exact_E_per_spin = compute_exact_energy(N, h)
         if exact_E_per_spin:
             print(f"  Exact ground state energy per spin: {exact_E_per_spin:.6f}")
         
-        for method_name in sorted(results[(N, h)].keys()):
-            runs = results[(N, h)][method_name]
+        for method_name in sorted(results[(N, h, rbm)].keys()):
+            runs = results[(N, h, rbm)][method_name]
             final_energies = [run["data"]["history"]["energy"][-1] / N for run in runs]
             final_errors = [abs(e - exact_E_per_spin) for e in final_energies] if exact_E_per_spin else []
             
@@ -202,10 +328,15 @@ if __name__ == "__main__":
     print_summary(results)
     
     print("\n" + "="*80)
-    print("Generating convergence plots...")
+    print("Generating convergence plots (one per N, h, RBM)...")
     print("="*80)
-    figs = plot_convergence_to_exact(results)
+    figs1 = plot_convergence_to_exact(results)
     
     print("\n" + "="*80)
-    print(f"Done! Generated {len(figs)} plots.")
+    print("Generating RBM comparison plots (comparing RBMs for same N, h)...")
+    print("="*80)
+    figs2 = plot_rbm_comparison(results)
+    
+    print("\n" + "="*80)
+    print(f"Done! Generated {len(figs1)} convergence plots and {len(figs2)} RBM comparison plots.")
     print("="*80)

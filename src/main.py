@@ -115,11 +115,12 @@ def main():
 
     # 2. Instantiate RBM
     n_hidden = args.n_hidden or args.size
+    n_visible = args.size if args.model == "1d" else args.size**2
     args.n_hidden = n_hidden
     if args.rbm == "full":
-        rbm = FullyConnectedRBM(args.size, n_hidden)
+        rbm = FullyConnectedRBM(n_visible, n_hidden)
     else:
-        rbm = DWaveTopologyRBM(args.size, n_hidden, solver=args.rbm)
+        rbm = DWaveTopologyRBM(n_visible, n_hidden, solver=args.rbm)
 
     # 3. Instantiate sampler
     if args.sampler == "custom":
@@ -135,10 +136,12 @@ def main():
         "n_iterations": args.iterations,
         "n_samples": args.n_samples,
         "regularization": args.regularization,
+        "save_checkpoints": False,  # Enable checkpoint saving
+        "checkpoint_interval": 10,  # Save every 10 iterations
     }
 
     # 5. Create trainer and run
-    trainer = Trainer(rbm, ising, sampler, trainer_config)
+    trainer = Trainer(rbm, ising, sampler, trainer_config, args=args)
 
     print(f"\nStarting training...")
     history = trainer.train()

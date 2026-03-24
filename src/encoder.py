@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from helpers import save_rbm_checkpoint
 
 
 # ---------------------------------------------------------------------------
@@ -153,7 +154,7 @@ class Trainer:
     — no Python loops over samples inside the training iteration.
     """
 
-    def __init__(self, rbm, ising_model, sampler, config: dict = None):
+    def __init__(self, rbm, ising_model, sampler, config: dict = None, args=None):
         """
         Config keys
         -----------
@@ -172,6 +173,7 @@ class Trainer:
         self.rbm = rbm
         self.ising = ising_model
         self.sampler = sampler
+        self.args = args  # For checkpoint saving
 
         if config is None:
             config = {}
@@ -192,6 +194,10 @@ class Trainer:
         self.conv_var_threshold = config.get("conv_var_threshold", 1e-4)
         self.conv_window = config.get("conv_window", 10)
         self.param_clip = config.get("param_clip", 3.0)
+        self.save_checkpoints = config.get("save_checkpoints", False)
+        self.checkpoint_interval = config.get(
+            "checkpoint_interval", 10
+        )  # Save every N iterations
 
         self.history = {
             "energy": [],
@@ -292,7 +298,17 @@ class Trainer:
                     f"res={cg_info['residual_norm']:.2e}  "
                     f"‖x‖={np.linalg.norm(x):.4f}"
                 )
-            # ── 8. Convergence check ──────────────────────────────────────
+
+            # ── 8. Save checkpoint ────────────────────────────────────────
+            if (
+                self.save_checkpoints
+                and self.args
+                and iteration % self.checkpoint_interval == 0
+            ):
+                checkpoint_path = save_rbm_checkpoint(self.rbm, self.args, iteration)
+                print(f"  → Checkpoint saved: {checkpoint_path.name}")
+
+            # ── 9. Convergence check ──────────────────────────────────────
             if self.stop_at_convergence:
                 if E_var < self.conv_var_threshold:
                     consecutive_converged += 1

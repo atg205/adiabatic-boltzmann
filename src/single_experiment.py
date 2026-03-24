@@ -11,7 +11,7 @@ from helpers import save_results
 from model import FullyConnectedRBM
 from sampler import ClassicalSampler, DimodSampler, VeloxSampler
 from encoder import Trainer
-from ising import TransverseFieldIsing1D
+from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
 from argparse import Namespace
 
 
@@ -23,6 +23,7 @@ def parse_args():
     p.add_argument("--method", type=str, required=True)
     p.add_argument("--seed", type=int, required=True)
     p.add_argument("--output-dir", type=str, default="results/")
+    p.add_argument("--model", choices=["1d", "2d"], default="1d")
     return p.parse_args()
 
 
@@ -30,8 +31,14 @@ def main():
     args = parse_args()
     np.random.seed(args.seed)
 
-    ising = TransverseFieldIsing1D(args.size, 0.5)
-    rbm = FullyConnectedRBM(args.size, args.size)
+    n_visible = args.size if args.model == "1d" else args.size**2
+    # 1. Instantiate Ising model
+    if args.model == "1d":
+        ising = TransverseFieldIsing1D(args.size)
+    elif args.model == "2d":
+        ising = TransverseFieldIsing2D(args.size)
+
+    rbm = FullyConnectedRBM(n_visible, n_visible)
 
     if args.sampler == "custom":
         sampler = ClassicalSampler(method=args.method)
@@ -47,6 +54,7 @@ def main():
         "n_iterations": 200,
         "n_samples": 1000,
         "regularization": 1e-3,
+        "stop_at_convergence": False,
     }
 
     ns_args = Namespace(

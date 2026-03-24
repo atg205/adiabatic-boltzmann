@@ -1,6 +1,94 @@
 import json
 from pathlib import Path
 import numpy as np
+import pickle
+
+
+def save_rbm_checkpoint(rbm, args, iteration):
+    """
+    Save RBM parameters (weights, biases) to a checkpoint file.
+    
+    Args:
+        rbm: RBM model instance
+        args: argparse Namespace with training config
+        iteration: current iteration number
+    
+    Returns:
+        Path to saved checkpoint
+    """
+    # Directory structure: checkpoints/size/sampler/sampling_method/rbm/
+    checkpoint_dir = Path(
+        f"{args.output_dir.replace('results', 'checkpoints')}/{args.size}/{args.sampler}/{args.sampling_method}/{args.rbm}"
+    )
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create checkpoint data
+    checkpoint = {
+        "iteration": iteration,
+        "config": vars(args),
+        "rbm_state": {
+            "a": rbm.a.tolist(),
+            "b": rbm.b.tolist(),
+            "W": rbm.W.tolist(),
+            "n_visible": rbm.n_visible,
+            "n_hidden": rbm.n_hidden,
+        }
+    }
+    
+    checkpoint_file = checkpoint_dir / (
+        f"checkpoint"
+        f"_{args.model}"
+        f"_h{args.h}"
+        f"_rbm{args.rbm}"
+        f"_nh{args.n_hidden}"
+        f"_lr{args.learning_rate}"
+        f"_iter{iteration:04d}"
+        f".pkl"
+    )
+    
+    with open(checkpoint_file, "wb") as f:
+        pickle.dump(checkpoint, f)
+    
+    return checkpoint_file
+
+
+def load_rbm_checkpoint(checkpoint_path):
+    """
+    Load RBM parameters from a checkpoint file.
+    
+    Args:
+        checkpoint_path: Path to checkpoint file
+    
+    Returns:
+        Tuple of (rbm_state_dict, config, iteration)
+    """
+    with open(checkpoint_path, "rb") as f:
+        checkpoint = pickle.load(f)
+    
+    return checkpoint["rbm_state"], checkpoint["config"], checkpoint["iteration"]
+
+
+def restore_rbm_from_checkpoint(rbm, checkpoint_path):
+    """
+    Restore RBM parameters from checkpoint into an RBM instance.
+    
+    Args:
+        rbm: RBM model instance to update
+        checkpoint_path: Path to checkpoint file
+    
+    Returns:
+        iteration number from checkpoint
+    """
+    rbm_state, config, iteration = load_rbm_checkpoint(checkpoint_path)
+    
+    rbm.a = np.array(rbm_state["a"])
+    rbm.b = np.array(rbm_state["b"])
+    rbm.W = np.array(rbm_state["W"])
+    
+    print(f"Restored RBM from checkpoint: {checkpoint_path}")
+    print(f"  Starting from iteration {iteration}")
+    
+    return iteration
 
 
 def save_results(args, history, ising):
