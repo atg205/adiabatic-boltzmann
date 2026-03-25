@@ -174,7 +174,9 @@ class Trainer:
         self.ising = ising_model
         self.sampler = sampler
         self.args = args  # For checkpoint saving
-
+        print(self.rbm)
+        print(self.ising)
+        print(self.args)
         if config is None:
             config = {}
 
