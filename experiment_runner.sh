@@ -17,9 +17,10 @@ SCRIPT="src/single_experiment.py"
 MODEL="2d"
 SIZES=(4 6 8)
 
+N_NH_STEPS=2 # 25%, 50%, 75%, 100% of n_visible
 LEARNING_RATES=(0.1 0.01)
-SAMPLERS=("custom:metropolis" "velox:velox")
-RBMS=("full" "pegasus" "zephyr")
+SAMPLERS=("custom:metropolis")
+RBMS=("pegasus")
 SEEDS=(1 42)
 ITERATIONS=300
 DWAVE_BUDGET_MS=1200000 # 20 minutes in milliseconds
@@ -84,7 +85,6 @@ if [ "$used_ms" -ge "$DWAVE_BUDGET_MS" ] 2>/dev/null; then
   log "             D-Wave experiments will be skipped."
 fi
 
-N_NH_STEPS=4 # 25%, 50%, 75%, 100% of n_visible
 TOTAL=$((${#SIZES[@]} * N_NH_STEPS * ${#LEARNING_RATES[@]} * ${#SAMPLERS[@]} * ${#RBMS[@]} * ${#SEEDS[@]}))
 log "Total experiments : $TOTAL"
 log "========================================================"
