@@ -15,6 +15,7 @@ import argparse
 import json
 import logging
 import os
+import signal
 import subprocess
 import sys
 import threading
@@ -54,11 +55,29 @@ MAX_RETRIES = 2
 # Thread-safe shared counters + locks
 # ---------------------------------------------------------------------------
 
-_log_lock = threading.Lock()
-_qpu_lock = threading.Lock()
-_count_lock = threading.Lock()
-_done = 0
+_log_lock    = threading.Lock()
+_qpu_lock    = threading.Lock()
+_count_lock  = threading.Lock()
+_procs_lock  = threading.Lock()
+_done   = 0
 _failed = 0
+_active_procs: list[subprocess.Popen] = []  # all live child processes
+
+
+def _shutdown(signum, frame):
+    """Kill all tracked child processes on SIGTERM/SIGINT, then exit."""
+    log(f"  [signal {signum}] Terminating {len(_active_procs)} active subprocess(es)...")
+    with _procs_lock:
+        for proc in _active_procs:
+            try:
+                proc.terminate()
+            except OSError:
+                pass
+    sys.exit(1)
+
+
+signal.signal(signal.SIGTERM, _shutdown)
+signal.signal(signal.SIGINT,  _shutdown)
 
 
 # ---------------------------------------------------------------------------
@@ -206,21 +225,27 @@ def run_experiment(exp: dict, idx: int, total: int, dry_run: bool) -> bool:
         if attempt > 1:
             log(f"  Retrying (attempt {attempt}/{MAX_RETRIES}) — {label}")
 
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        with _procs_lock:
+            _active_procs.append(proc)
 
-        # Flush subprocess stdout/stderr into the shared log (thread-safe)
-        output = (result.stdout + result.stderr).strip()
-        if output:
+        stdout, _ = proc.communicate()  # blocks until child exits
+
+        with _procs_lock:
+            _active_procs.remove(proc)
+
+        # Flush subprocess output into the shared log (thread-safe)
+        if stdout.strip():
             with _log_lock:
-                for line in output.splitlines():
+                for line in stdout.strip().splitlines():
                     logging.info("    | %s", line)
 
-        if result.returncode == 0:
+        if proc.returncode == 0:
             with _count_lock:
                 _done += 1
             return True
 
-        log(f"  Attempt {attempt}/{MAX_RETRIES} failed (exit {result.returncode})")
+        log(f"  Attempt {attempt}/{MAX_RETRIES} failed (exit {proc.returncode})")
 
     log(f"  All {MAX_RETRIES} attempts failed — skipping.")
     with _count_lock:
@@ -273,6 +298,7 @@ def main():
         log("DRY RUN — no experiments will be executed")
     log("=" * 60)
 
+    global _done, _failed
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {
             pool.submit(run_experiment, exp, i + 1, total, args.dry_run): exp

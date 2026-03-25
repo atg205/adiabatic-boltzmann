@@ -456,7 +456,7 @@ class DimodSampler(Sampler):
                 )
                 if tries < MAX_DWAVE_RETRIES:
                     # Invalidate cache — composite may have stale connections after failure
-                    del self._embedding_cache[cache_key]
+                    self._embedding_cache.pop(cache_key, None)
                     dwave_sampler = DWaveSampler(solver=solver_name)
                     composite = (
                         FixedEmbeddingComposite(
