@@ -32,6 +32,7 @@ def load_results(root: Path) -> list[dict]:
         records.append(
             {
                 "file": str(file),
+                "model": config.get("model", "1d"),
                 "size": int(config["size"]),
                 "h": float(config["h"]),
                 "rbm": config["rbm"],
@@ -170,6 +171,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <h1>VMC <span>Benchmark</span></h1>
   <span class="run-count" id="run-count"></span>
   <div class="filter-bar">
+    <div class="fg"><label>Model</label>
+      <select id="f-model" onchange="applyFilters()"><option value="">All</option></select></div>
     <div class="fg"><label>Sampler</label>
       <select id="f-sampler" onchange="applyFilters()"><option value="">All</option></select></div>
     <div class="fg"><label>Method</label>
@@ -195,7 +198,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <aside>
     <span class="sidebar-label">Overview</span>
     <button class="nh-btn active" onclick="showPanel('overview')" id="btn-overview">All runs</button>
-    <span class="sidebar-label">By (N, h)</span>
+    <span class="sidebar-label">By (model, N, h)</span>
     <div id="nh-buttons"></div>
   </aside>
   <main>
@@ -247,13 +250,15 @@ function lineds(label,curve,color,dash=[]){
 }
 
 // ── keys ──────────────────────────────────────────────────────────────────
-const nhKey=r=>`N${r.size}_h${r.h}`;
-const nhLabel=r=>`N=${r.size}, h=${r.h}`;
+const nhKey=r=>`${r.model}_N${r.size}_h${r.h}`;
+const nhLabel=r=>r.model==='2d'
+  ?`2D L=${r.size} (${r.size*r.size} spins), h=${r.h}`
+  :`1D N=${r.size}, h=${r.h}`;
 const smKey=r=>`${r.sampler}/${r.sampling_method}`;
 
 const nhKeys=[...new Set(ALL_RUNS.map(nhKey))].sort((a,b)=>{
-  const pa=a.match(/N(\d+)_h([\d.]+)/),pb=b.match(/N(\d+)_h([\d.]+)/);
-  return(+pa[1]-+pb[1])||(+pa[2]-+pb[2]);
+  const pa=a.match(/^(\w+)_N(\d+)_h([\d.]+)/),pb=b.match(/^(\w+)_N(\d+)_h([\d.]+)/);
+  return pa[1].localeCompare(pb[1])||(+pa[2]-+pb[2])||(+pa[3]-+pb[3]);
 });
 const nhLabelMap={};
 ALL_RUNS.forEach(r=>{nhLabelMap[nhKey(r)]=nhLabel(r)});
@@ -263,23 +268,25 @@ let ACTIVE=ALL_RUNS.slice();
 
 function applyFilters(){
   const fs={
+    model:$('f-model').value,
     sampler:$('f-sampler').value,
     sampling_method:$('f-method').value,
     rbm:$('f-rbm').value,
     n_hidden:$('f-nhidden').value,
     n_samples:$('f-nsamples').value,
     reg:$('f-reg').value,
-    lr:$('f-lr').value,  
+    lr:$('f-lr').value,
     seed:$('f-seed').value,
   };
   ACTIVE=ALL_RUNS.filter(r=>
+    (!fs.model||r.model===fs.model)&&
     (!fs.sampler||r.sampler===fs.sampler)&&
     (!fs.sampling_method||r.sampling_method===fs.sampling_method)&&
     (!fs.rbm||r.rbm===fs.rbm)&&
     (!fs.n_hidden||String(r.n_hidden)===fs.n_hidden)&&
     (!fs.n_samples||String(r.n_samples)===fs.n_samples)&&
     (!fs.reg||String(r.reg)===fs.reg)&&
-    (!fs.lr||String(r.lr)=== fs.lr)&& // ← add
+    (!fs.lr||String(r.lr)===fs.lr)&&
     (!fs.seed||String(r.seed)===fs.seed)
   );
   const nActive=Object.values(fs).filter(Boolean).length;
@@ -298,7 +305,7 @@ function applyFilters(){
 }
 
 function resetFilters(){
-  ['f-sampler','f-method','f-rbm','f-nhidden','f-nsamples','f-reg','f-lr','f-seed'].forEach(id=>$(id).value='');
+  ['f-model','f-sampler','f-method','f-rbm','f-nhidden','f-nsamples','f-reg','f-lr','f-seed'].forEach(id=>$(id).value='');
   applyFilters();
 }
 
@@ -307,6 +314,7 @@ function popSel(id,vals){
   const el=$(id);
   [...new Set(vals)].sort().forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o)});
 }
+popSel('f-model',   ALL_RUNS.map(r=>r.model));
 popSel('f-sampler', ALL_RUNS.map(r=>r.sampler));
 popSel('f-method',  ALL_RUNS.map(r=>r.sampling_method));
 popSel('f-rbm',     ALL_RUNS.map(r=>r.rbm));
@@ -317,7 +325,7 @@ popSel('f-lr', ALL_RUNS.map(r => String(r.lr)));
 popSel('f-seed',    ALL_RUNS.map(r=>String(r.seed)));
 
 // run count
-$('run-count').textContent=`${ALL_RUNS.length} runs · ${nhKeys.length} (N,h) pairs`;
+$('run-count').textContent=`${ALL_RUNS.length} runs · ${nhKeys.length} (model,N,h) groups`;
 
 // sidebar
 nhKeys.forEach(key=>{
@@ -344,16 +352,17 @@ function rebuildOverview(){
 
   const errs=runs.map(r=>r.rel_error);
   const best=Math.min(...errs),med=errs.slice().sort((a,b)=>a-b)[Math.floor(errs.length/2)],worst=Math.max(...errs);
+  const models=[...new Set(runs.map(r=>r.model))].sort();
   const samplers=[...new Set(runs.map(r=>r.sampler))];
   const methods=[...new Set(runs.map(r=>r.sampling_method))];
-
-  $('ov-sub').textContent=`${runs.length} runs · ${new Set(runs.map(nhKey)).size} (N,h) pairs`;
+  $('ov-sub').textContent=`${runs.length} runs · ${new Set(runs.map(nhKey)).size} (model,N,h) groups · ${models.join(', ')}`;
   const notice=$('ov-notice');
   if(ACTIVE.length<ALL_RUNS.length){notice.textContent=`Filtered: ${ACTIVE.length}/${ALL_RUNS.length} runs`;notice.classList.add('on')}
   else notice.classList.remove('on');
 
   $('ov-stats').innerHTML=`
     <div class="stat-card"><div class="stat-label">Runs</div><div class="stat-value">${runs.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Models</div><div class="stat-value" style="font-size:13px">${models.join(', ')}</div></div>
     <div class="stat-card"><div class="stat-label">Best Error</div><div class="stat-value ${errCls(best)}">${fmtP(best)}</div></div>
     <div class="stat-card"><div class="stat-label">Median Error</div><div class="stat-value ${errCls(med)}">${fmtP(med)}</div></div>
     <div class="stat-card"><div class="stat-label">Worst Error</div><div class="stat-value ${errCls(worst)}">${fmtP(worst)}</div></div>
@@ -361,25 +370,34 @@ function rebuildOverview(){
     <div class="stat-card"><div class="stat-label">Methods</div><div class="stat-value" style="font-size:13px">${methods.join(', ')}</div></div>
   `;
 
-  // heatmap
-  const sizes=[...new Set(runs.map(r=>r.size))].sort((a,b)=>a-b);
+  // heatmap — rows are (model, size), columns are h values
+  const rowKeys=[...new Set(runs.map(r=>`${r.model}|${r.size}`))].sort((a,b)=>{
+    const [am,as]=[a.split('|')[0],+a.split('|')[1]];
+    const [bm,bs]=[b.split('|')[0],+b.split('|')[1]];
+    return am.localeCompare(bm)||as-bs;
+  });
   const hs=[...new Set(runs.map(r=>r.h))].sort((a,b)=>a-b);
   const cells=[];
-  sizes.forEach(sz=>hs.forEach(h=>{
-    const sub=runs.filter(r=>r.size===sz&&r.h===h);
-    if(sub.length)cells.push({sz,h,best:Math.min(...sub.map(r=>r.rel_error)),n:sub.length});
-  }));
+  rowKeys.forEach(rk=>{
+    const [model,szStr]=rk.split('|');const sz=+szStr;
+    hs.forEach(h=>{
+      const sub=runs.filter(r=>r.model===model&&r.size===sz&&r.h===h);
+      if(sub.length)cells.push({model,sz,h,best:Math.min(...sub.map(r=>r.rel_error)),n:sub.length});
+    });
+  });
   const allB=cells.map(c=>c.best),minV=Math.min(...allB),maxV=Math.max(...allB);
-  const cw=Math.max(72,Math.floor(520/hs.length));
-  let html=`<div style="display:grid;grid-template-columns:52px ${hs.map(()=>cw+'px').join(' ')};gap:3px">`;
+  const rowLabelW=72;const cw=Math.max(72,Math.floor(520/hs.length));
+  let html=`<div style="display:grid;grid-template-columns:${rowLabelW}px ${hs.map(()=>cw+'px').join(' ')};gap:3px">`;
   html+=`<div></div>`;
   hs.forEach(h=>{html+=`<div style="text-align:center;font-size:9px;color:var(--text3);padding-bottom:3px">h=${h}</div>`});
-  sizes.forEach(sz=>{
-    html+=`<div style="font-size:9px;color:var(--text3);display:flex;align-items:center">N=${sz}</div>`;
+  rowKeys.forEach(rk=>{
+    const [model,szStr]=rk.split('|');const sz=+szStr;
+    const rowLabel=model==='2d'?`2D L=${sz}`:  `1D N=${sz}`;
+    html+=`<div style="font-size:9px;color:var(--text3);display:flex;align-items:center">${rowLabel}</div>`;
     hs.forEach(h=>{
-      const c=cells.find(x=>x.sz===sz&&x.h===h);
+      const c=cells.find(x=>x.model===model&&x.sz===sz&&x.h===h);
       if(!c){html+=`<div style="height:48px;border-radius:4px;background:var(--bg3)"></div>`;return;}
-      html+=`<div class="heatmap-cell" style="background:${heatColor(c.best,minV,maxV)}" onclick="showPanel('nh-N${sz}_h${h}')">
+      html+=`<div class="heatmap-cell" style="background:${heatColor(c.best,minV,maxV)}" onclick="showPanel('nh-${model}_N${sz}_h${h}')">
         <div class="cv">${c.best.toFixed(2)}%</div><div class="cs">${c.n} runs</div></div>`;
     });
   });

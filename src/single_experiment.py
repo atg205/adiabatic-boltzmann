@@ -24,6 +24,15 @@ def parse_args():
     p.add_argument("--seed", type=int, required=True)
     p.add_argument("--output-dir", type=str, default="results/")
     p.add_argument("--model", choices=["1d", "2d"], default="1d")
+    (
+        p.add_argument(
+            "--n-hidden",
+            type=int,
+            default=None,
+            help="Number of hidden units. Defaults to size (1D) or size (2D linear dim).",
+        ),
+    )
+    (p.add_argument("--iterations", type=int, default=300),)
     return p.parse_args()
 
 
@@ -37,7 +46,7 @@ def main():
         ising = TransverseFieldIsing1D(args.size)
     elif args.model == "2d":
         ising = TransverseFieldIsing2D(args.size)
-    n_hidden = args.size
+    n_hidden = args.n_hidden if args.n_hidden is not None else args.size
     rbm = FullyConnectedRBM(n_visible, n_hidden)
 
     if args.sampler == "custom":
@@ -51,7 +60,7 @@ def main():
 
     trainer_config = {
         "learning_rate": args.lr,
-        "n_iterations": 300,
+        "n_iterations": args.iterations,
         "n_samples": 1000,
         "regularization": 1e-3,
         "stop_at_convergence": False,
@@ -65,7 +74,7 @@ def main():
         n_hidden=n_hidden,
         sampler=args.sampler,
         sampling_method=args.method,
-        iterations=300,
+        iterations=args.iterations,
         learning_rate=args.lr,
         regularization=1e-3,
         n_samples=1000,

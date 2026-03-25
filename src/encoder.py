@@ -218,11 +218,16 @@ class Trainer:
         consecutive_converged = 0  # ← add this
         for iteration in range(self.n_iterations):
             # ── 1. Sample ──────────────────────────────────────────────────
-            samples = self.sampler.sample(
-                self.rbm,
-                self.n_samples,
-                config={"beta_x": self.beta_x},
-            )
+            try:
+                samples = self.sampler.sample(
+                    self.rbm,
+                    self.n_samples,
+                    config={"beta_x": self.beta_x},
+                )
+            except Exception as e:
+                print(f"  [Trainer] Sampling failed at iteration {iteration}: {e}")
+                print("  [Trainer] Aborting this experiment.")
+                raise
             V = np.array([v.copy() for v in samples], dtype=np.float64)  # (ns, N)
             ns = V.shape[0]
 

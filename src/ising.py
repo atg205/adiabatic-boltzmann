@@ -197,7 +197,7 @@ class TransverseFieldIsing2D(IsingModel):
 
         Diagonal term:  E_diag(v) = -Σ_{bonds} v_i * v_j (right & down, no double-count)
         Off-diagonal:   E_off(v)  = -h * Σ_i Ψ(v_flip_i)/Ψ(v)
-        
+
         V: (n_samples, N) where N = L²
         Returns: (n_samples,) local energies
         """
@@ -242,16 +242,16 @@ class TransverseFieldIsing2D(IsingModel):
         Ground state energy for 2D TFIM.
         Uses exact diagonalization for small systems (L ≤ 4).
         For larger systems, uses reference values from literature.
-        
+
         Reference values (per spin) from: Blöte & Deng (2002), Albuquerque et al. (2010)
         Note: finite-size corrections apply for finite systems.
         """
         L = self.linear_size
         N = self.size
-        
+
         if False and L <= 4:
             return self._exact_diag_2d()
-        
+
         # Reference energies per spin for 2D TFIM (thermodynamic limit)
         reference_energies_per_spin = {
             0.5: -2.0555,
@@ -259,10 +259,10 @@ class TransverseFieldIsing2D(IsingModel):
             2.0: -2.4549,
             3.044: -3.0440,  # critical point
         }
-        
+
         if self.h in reference_energies_per_spin:
             return reference_energies_per_spin[self.h] * N
-        
+
         raise NotImplementedError(
             f"No reference energy available for 2D TFIM with h={self.h} and L={L}. "
             f"Known h values: {list(reference_energies_per_spin.keys())}. "

@@ -259,7 +259,18 @@ class VeloxSampler(Sampler):
         self.n_visible = rbm.n_visible
         J, h = self.rbm_to_ising(rbm)
         self.solver.parameters.num_rep = n_samples
-        sampleset = self.solver.sample(h, J)
+
+        MAX_VELOX_RETRIES = 3
+        for attempt in range(1, MAX_VELOX_RETRIES + 1):
+            try:
+                sampleset = self.solver.sample(h, J)
+                break
+            except Exception as e:
+                print(f"  [VeloxQ] attempt {attempt}/{MAX_VELOX_RETRIES} failed: {e}")
+                if attempt == MAX_VELOX_RETRIES:
+                    raise RuntimeError(
+                        f"VeloxQ sampling failed after {MAX_VELOX_RETRIES} attempts."
+                    ) from e
 
         df = sampleset.to_pandas_dataframe()
         df = df.loc[df.index.repeat(df["num_occurrences"])].reset_index(

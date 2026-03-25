@@ -14,13 +14,13 @@ SKIP_FIRST_N=0
 OUTPUT_DIR="results/"
 LOG_FILE="benchmark.log"
 SCRIPT="src/single_experiment.py"
-
+MODEL="2d"
 SIZES=(4 6 8)
 
 LEARNING_RATES=(0.1 0.01)
 SAMPLERS=("custom:metropolis" "velox:velox")
 SEEDS=(1 42)
-
+ITERATIONS=300
 DWAVE_BUDGET_MS=1200000 # 20 minutes in milliseconds
 TIME_FILE="time.json"
 
@@ -83,7 +83,8 @@ if [ "$used_ms" -ge "$DWAVE_BUDGET_MS" ] 2>/dev/null; then
   log "             D-Wave experiments will be skipped."
 fi
 
-TOTAL=$((${#SIZES[@]} * ${#LEARNING_RATES[@]} * ${#SAMPLERS[@]} * ${#SEEDS[@]}))
+N_NH_STEPS=4 # 25%, 50%, 75%, 100% of n_visible
+TOTAL=$((${#SIZES[@]} * N_NH_STEPS * ${#LEARNING_RATES[@]} * ${#SAMPLERS[@]} * ${#SEEDS[@]}))
 log "Total experiments : $TOTAL"
 log "========================================================"
 
@@ -94,78 +95,97 @@ log "========================================================"
 DONE=0
 SKIPPED=0
 FAILED=0
-ABORTED=0
 
 for size in "${SIZES[@]}"; do
-  for lr in "${LEARNING_RATES[@]}"; do
-    for sampler_method in "${SAMPLERS[@]}"; do
-      for seed in "${SEEDS[@]}"; do
 
-        sampler="${sampler_method%%:*}"
-        method="${sampler_method##*:}"
-        idx=$((DONE + SKIPPED + 1))
+  # Compute n_visible and the 4 n_hidden steps (25%, 50%, 75%, 100% of n_visible)
+  if [ "$MODEL" == "2d" ]; then
+    n_visible=$((size * size))
+  else
+    n_visible=$size
+  fi
+  nh1=$((n_visible / 4))
+  nh2=$((n_visible / 2))
+  nh3=$((3 * n_visible / 4))
+  nh4=$n_visible
+  N_HIDDEN_VALUES=($nh1 $nh2 $nh3 $nh4)
 
-        # ── Skip first N ──────────────────────────────────────────────────────
-        if [ "$SKIPPED" -lt "$SKIP_FIRST_N" ]; then
-          SKIPPED=$((SKIPPED + 1))
-          log "[skip $SKIPPED/$SKIP_FIRST_N] N=$size lr=$lr $sampler/$method seed=$seed"
-          continue
-        fi
+  log ""
+  log "Size=$size  n_visible=$n_visible  n_hidden sweep: ${N_HIDDEN_VALUES[*]}"
 
-        # ── QPU budget check ──────────────────────────────────────────────────
-        if is_dwave "$method"; then
-          used_ms=$(read_qpu_time_ms)
-          if [ "$used_ms" -ge "$DWAVE_BUDGET_MS" ] 2>/dev/null; then
-            log ""
-            log "[QPU BUDGET] $(format_min $used_ms) min used >= $(format_min $DWAVE_BUDGET_MS) min limit."
-            log "             Aborting remaining D-Wave experiments."
-            ABORTED=$((TOTAL - DONE - SKIPPED))
-            break 4
-          fi
-          qpu_info="  QPU used=$(format_min $used_ms)min"
-        else
-          qpu_info=""
-        fi
+  for n_hidden in "${N_HIDDEN_VALUES[@]}"; do
+    local_alpha=$(python3 -c "print(f'{$n_hidden/$n_visible:.2f}')")
 
-        log ""
-        log "[$idx/$TOTAL] N=$size lr=$lr $sampler/$method seed=$seed$qpu_info"
+    for lr in "${LEARNING_RATES[@]}"; do
+      for sampler_method in "${SAMPLERS[@]}"; do
+        for seed in "${SEEDS[@]}"; do
 
-        # ── Run with one retry ────────────────────────────────────────────────
-        success=0
-        for attempt in 1 2; do
-          if [ "$attempt" -eq 2 ]; then
-            log "  Retrying (attempt $attempt/2)..."
+          sampler="${sampler_method%%:*}"
+          method="${sampler_method##*:}"
+          idx=$((DONE + SKIPPED + FAILED + 1))
+
+          # ── Skip first N ──────────────────────────────────────────────────────
+          if [ "$SKIPPED" -lt "$SKIP_FIRST_N" ]; then
+            SKIPPED=$((SKIPPED + 1))
+            log "[skip $SKIPPED/$SKIP_FIRST_N] size=$size nh=$n_hidden lr=$lr $sampler/$method seed=$seed"
+            continue
           fi
 
-          python3 "$SCRIPT" \
-            --size "$size" \
-            --lr "$lr" \
-            --sampler "$sampler" \
-            --method "$method" \
-            --seed "$seed" \
-            --output-dir "$OUTPUT_DIR" \
-            --model "2d" \
-            2>&1 | tee -a "$LOG_FILE"
-
-          exit_code=${PIPESTATUS[0]}
-
-          if [ "$exit_code" -eq 0 ]; then
-            success=1
-            break
+          # ── QPU budget check ──────────────────────────────────────────────────
+          if is_dwave "$method"; then
+            used_ms=$(read_qpu_time_ms)
+            if [ "$used_ms" -ge "$DWAVE_BUDGET_MS" ] 2>/dev/null; then
+              log ""
+              log "[QPU BUDGET] $(format_min $used_ms) min used >= $(format_min $DWAVE_BUDGET_MS) min limit."
+              log "             Aborting remaining D-Wave experiments."
+              break 5
+            fi
+            qpu_info="  QPU used=$(format_min $used_ms)min"
           else
-            log "  Attempt $attempt failed (exit code $exit_code)"
+            qpu_info=""
           fi
+
+          log ""
+          log "[$idx/$TOTAL] size=$size nh=$n_hidden (α=$local_alpha) lr=$lr $sampler/$method seed=$seed$qpu_info"
+
+          # ── Run with one retry ──────────────────────────────────────────────
+          success=0
+          for attempt in 1 2; do
+            if [ "$attempt" -eq 2 ]; then
+              log "  Retrying (attempt $attempt/2)..."
+            fi
+
+            python3 "$SCRIPT" \
+              --size "$size" \
+              --lr "$lr" \
+              --sampler "$sampler" \
+              --method "$method" \
+              --seed "$seed" \
+              --output-dir "$OUTPUT_DIR" \
+              --model "$MODEL" \
+              --n-hidden "$n_hidden" \
+              --iterations "$ITERATIONS" \
+              2>&1 | tee -a "$LOG_FILE"
+
+            exit_code=${PIPESTATUS[0]}
+
+            if [ "$exit_code" -eq 0 ]; then
+              success=1
+              break
+            else
+              log "  Attempt $attempt failed (exit code $exit_code)"
+            fi
+          done
+
+          if [ "$success" -eq 0 ]; then
+            log "  Both attempts failed — skipping this experiment, continuing sweep."
+            FAILED=$((FAILED + 1))
+            continue
+          fi
+
+          DONE=$((DONE + 1))
+
         done
-
-        if [ "$success" -eq 0 ]; then
-          log "  Both attempts failed — aborting sweep."
-          FAILED=$((FAILED + 1))
-          ABORTED=$((TOTAL - DONE - SKIPPED - FAILED))
-          break 4
-        fi
-
-        DONE=$((DONE + 1))
-
       done
     done
   done
@@ -181,7 +201,7 @@ log ""
 log "========================================================"
 log "Benchmark finished : $(date)"
 log "Completed          : $DONE / $TOTAL"
-log "Skipped            : $SKIPPED"
-log "Failed + aborted   : $((FAILED + ABORTED))"
+log "Skipped (--skip)   : $SKIPPED"
+log "Failed (skipped)   : $FAILED"
 log "Total QPU time     : $(format_min $final_used_ms) min"
 log "========================================================"
