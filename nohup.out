@@ -17693,3 +17693,1501 @@ SystemExit: 1
 14:09:14      |   Error        : 0.885713
 14:09:14      |   Checkpoint → checkpoints/6/custom/metropolis/full/checkpoint_2d_h0.5_rbmfull_nh36_lr0.01_iter0300.pkl
 14:09:14  [  40/48] size=8 nh=64 (α=1.00) rbm=full h=0.5 lr=0.01 dimod/simulated_annealing seed=42
+14:17:05    [signal 15] Terminating 5 active subprocess(es)...
+14:17:06    Attempt 1/2 failed (exit -15)
+14:17:06    Retrying (attempt 2/2) — [  59/60] size=8 nh=64 (α=1.00) rbm=full lr=0.01 dimod/simulated_annealing seed=1
+14:17:06    Attempt 1/2 failed (exit -15)
+14:17:06    Retrying (attempt 2/2) — [  49/60] size=8 nh=64 (α=1.00) rbm=full lr=0.1 dimod/simulated_annealing seed=1
+14:17:06    Attempt 1/2 failed (exit -15)
+14:17:06    Retrying (attempt 2/2) — [  50/60] size=8 nh=64 (α=1.00) rbm=full lr=0.1 dimod/simulated_annealing seed=42
+14:17:06    Attempt 1/2 failed (exit -15)
+14:17:06    Retrying (attempt 2/2) — [  60/60] size=8 nh=64 (α=1.00) rbm=full lr=0.01 dimod/simulated_annealing seed=42
+14:17:06    Attempt 1/2 failed (exit -15)
+14:17:06    Retrying (attempt 2/2) — [  47/60] size=8 nh=64 (α=1.00) rbm=full lr=0.1 dimod/zephyr seed=1
+14:17:07      | usage: single_experiment.py [-h] --size SIZE --lr LR --sampler SAMPLER
+14:17:07      |                             --method METHOD --seed SEED
+14:17:07      |                             [--output-dir OUTPUT_DIR] [--model {1d,2d}]
+14:17:07      |                             [--n-hidden N_HIDDEN] --h H
+14:17:07      |                             [--iterations ITERATIONS]
+14:17:07      |                             [--rbm {full,pegasus,zephyr}] [--resume]
+14:17:07      | single_experiment.py: error: the following arguments are required: --h
+14:17:07    Attempt 2/2 failed (exit 2)
+14:17:07    All 2 attempts failed — skipping.
+14:17:07      | usage: single_experiment.py [-h] --size SIZE --lr LR --sampler SAMPLER
+14:17:07      |                             --method METHOD --seed SEED
+14:17:07      |                             [--output-dir OUTPUT_DIR] [--model {1d,2d}]
+14:17:07      |                             [--n-hidden N_HIDDEN] --h H
+14:17:07      |                             [--iterations ITERATIONS]
+14:17:07      |                             [--rbm {full,pegasus,zephyr}] [--resume]
+14:17:07      | single_experiment.py: error: the following arguments are required: --h
+14:17:07    Attempt 2/2 failed (exit 2)
+14:17:07    All 2 attempts failed — skipping.
+14:17:07      | usage: single_experiment.py [-h] --size SIZE --lr LR --sampler SAMPLER
+14:17:07      |                             --method METHOD --seed SEED
+14:17:07      |                             [--output-dir OUTPUT_DIR] [--model {1d,2d}]
+14:17:07      |                             [--n-hidden N_HIDDEN] --h H
+14:17:07      |                             [--iterations ITERATIONS]
+14:17:07      |                             [--rbm {full,pegasus,zephyr}] [--resume]
+14:17:07      | single_experiment.py: error: the following arguments are required: --h
+14:17:07    Attempt 2/2 failed (exit 2)
+14:17:07    All 2 attempts failed — skipping.
+14:17:07      | usage: single_experiment.py [-h] --size SIZE --lr LR --sampler SAMPLER
+14:17:07      |                             --method METHOD --seed SEED
+14:17:07      |                             [--output-dir OUTPUT_DIR] [--model {1d,2d}]
+14:17:07      |                             [--n-hidden N_HIDDEN] --h H
+14:17:07      |                             [--iterations ITERATIONS]
+14:17:07      |                             [--rbm {full,pegasus,zephyr}] [--resume]
+14:17:07      | single_experiment.py: error: the following arguments are required: --h
+14:17:07    Attempt 2/2 failed (exit 2)
+14:17:07    All 2 attempts failed — skipping.
+14:17:07      | usage: single_experiment.py [-h] --size SIZE --lr LR --sampler SAMPLER
+14:17:07      |                             --method METHOD --seed SEED
+14:17:07      |                             [--output-dir OUTPUT_DIR] [--model {1d,2d}]
+14:17:07      |                             [--n-hidden N_HIDDEN] --h H
+14:17:07      |                             [--iterations ITERATIONS]
+14:17:07      |                             [--rbm {full,pegasus,zephyr}] [--resume]
+14:17:07      | single_experiment.py: error: the following arguments are required: --h
+14:17:07    Attempt 2/2 failed (exit 2)
+14:17:07    All 2 attempts failed — skipping.
+14:25:39      | <model.FullyConnectedRBM object at 0x7785b2877e00>
+14:25:39      | <ising.TransverseFieldIsing2D object at 0x7785b8d4b8c0>
+14:25:39      | None
+14:25:39      |   unique samples: 1000/1000
+14:25:39      | Iter   0: E = -18.143417 ± 0.258921  β_x = 2.000  CG 102it res=8.02e-09  ‖x‖=102.2607
+14:25:39      |   unique samples: 29/1000
+14:25:39      |   unique samples: 19/1000
+14:25:39      |   unique samples: 14/1000
+14:25:39      |   unique samples: 4/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter  10: E = -42.308398 ± 0.000468  β_x = 2.309  CG 1it res=1.32e-13  ‖x‖=0.0036
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter  20: E = -42.307805 ± 0.000432  β_x = 2.413  CG 1it res=1.38e-14  ‖x‖=0.0033
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter  30: E = -42.308700 ± 0.000392  β_x = 2.172  CG 1it res=1.26e-13  ‖x‖=0.0030
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 4/1000
+14:25:39      | Iter  40: E = -42.308392 ± 0.000360  β_x = 2.058  CG 1it res=6.71e-14  ‖x‖=0.0028
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      | Iter  50: E = -42.308070 ± 0.000331  β_x = 2.048  CG 1it res=3.08e-15  ‖x‖=0.0026
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter  60: E = -42.307526 ± 0.000306  β_x = 1.844  CG 1it res=5.29e-14  ‖x‖=0.0024
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter  70: E = -42.143774 ± 0.000329  β_x = 2.124  CG 1it res=6.86e-14  ‖x‖=0.0025
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter  80: E = -42.143963 ± 0.000302  β_x = 2.581  CG 1it res=1.25e-13  ‖x‖=0.0023
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter  90: E = -42.142870 ± 0.000283  β_x = 2.324  CG 1it res=5.44e-14  ‖x‖=0.0022
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 100: E = -42.143309 ± 0.000260  β_x = 2.087  CG 1it res=1.72e-13  ‖x‖=0.0020
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 110: E = -42.143151 ± 0.000241  β_x = 1.874  CG 1it res=6.46e-14  ‖x‖=0.0018
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 120: E = -42.142979 ± 0.000223  β_x = 1.865  CG 1it res=4.40e-15  ‖x‖=0.0017
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 130: E = -42.143035 ± 0.000206  β_x = 1.763  CG 1it res=4.91e-15  ‖x‖=0.0016
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 140: E = -42.143184 ± 0.000189  β_x = 2.035  CG 1it res=3.95e-14  ‖x‖=0.0015
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 150: E = -42.143021 ± 0.000175  β_x = 1.832  CG 1it res=2.84e-14  ‖x‖=0.0014
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 160: E = -42.142749 ± 0.000163  β_x = 2.338  CG 1it res=3.16e-14  ‖x‖=0.0012
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 170: E = -42.142577 ± 0.000151  β_x = 1.809  CG 1it res=8.23e-14  ‖x‖=0.0012
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 180: E = -42.142166 ± 0.000140  β_x = 1.990  CG 1it res=8.49e-14  ‖x‖=0.0011
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 190: E = -42.142478 ± 0.000129  β_x = 2.079  CG 1it res=1.82e-14  ‖x‖=0.0010
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 200: E = -42.142626 ± 0.000118  β_x = 1.778  CG 1it res=2.10e-14  ‖x‖=0.0009
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 210: E = -42.142515 ± 0.000109  β_x = 2.053  CG 1it res=1.57e-14  ‖x‖=0.0008
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 220: E = -42.142232 ± 0.000102  β_x = 1.844  CG 1it res=3.28e-14  ‖x‖=0.0008
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 230: E = -42.142366 ± 0.000094  β_x = 1.660  CG 1it res=1.19e-13  ‖x‖=0.0007
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 240: E = -42.142108 ± 0.000088  β_x = 1.917  CG 1it res=1.74e-13  ‖x‖=0.0007
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 250: E = -42.142194 ± 0.000080  β_x = 2.213  CG 1it res=2.18e-13  ‖x‖=0.0006
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 260: E = -42.142117 ± 0.000075  β_x = 2.197  CG 1it res=2.82e-13  ‖x‖=0.0006
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 270: E = -42.142123 ± 0.000069  β_x = 2.180  CG 1it res=5.61e-14  ‖x‖=0.0005
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 3/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 280: E = -42.142064 ± 0.000064  β_x = 2.061  CG 1it res=2.82e-14  ‖x‖=0.0005
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Iter 290: E = -42.142059 ± 0.000059  β_x = 2.051  CG 1it res=3.42e-14  ‖x‖=0.0005
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      |   unique samples: 2/1000
+14:25:39      | Saved  → results/6/dimod/simulated_annealing/result_2d_h0.5_rbmfull_nh36_lr0.1_reg0.001_ns1000_seed42_iter300.json
+14:25:39      |   Final energy : -42.141987
+14:25:39      |   Exact energy : -73.998000
+14:25:39      |   Error        : 31.856013
+14:25:39      |   Checkpoint → checkpoints/6/dimod/simulated_annealing/full/checkpoint_2d_h0.5_rbmfull_nh36_lr0.1_iter0300.pkl
+14:25:39  [  41/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.1 custom/metropolis seed=1
+14:25:59      | <model.FullyConnectedRBM object at 0x75a1e878be00>
+14:25:59      | <ising.TransverseFieldIsing2D object at 0x75a1eec438c0>
+14:25:59      | None
+14:25:59      |   unique samples: 1000/1000
+14:25:59      | Iter   0: E = -18.424723 ± 0.266947  β_x = 2.000  CG 105it res=7.92e-09  ‖x‖=102.4592
+14:25:59      |   unique samples: 18/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter  10: E = -74.730703 ± 0.000462  β_x = 1.895  CG 1it res=1.89e-13  ‖x‖=0.0036
+14:25:59      |   unique samples: 5/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter  20: E = -73.892276 ± 0.000330  β_x = 1.787  CG 1it res=3.69e-13  ‖x‖=0.0025
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter  30: E = -73.892005 ± 0.000304  β_x = 1.689  CG 1it res=1.00e-13  ‖x‖=0.0024
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter  40: E = -73.891527 ± 0.000280  β_x = 1.597  CG 1it res=2.02e-13  ‖x‖=0.0022
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter  50: E = -73.892082 ± 0.000260  β_x = 1.509  CG 1it res=1.67e-13  ‖x‖=0.0020
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter  60: E = -73.892286 ± 0.000241  β_x = 1.660  CG 1it res=4.77e-14  ‖x‖=0.0019
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter  70: E = -73.891911 ± 0.000222  β_x = 1.647  CG 1it res=9.32e-14  ‖x‖=0.0017
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter  80: E = -73.892445 ± 0.000206  β_x = 1.557  CG 1it res=8.22e-14  ‖x‖=0.0016
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter  90: E = -73.892347 ± 0.000191  β_x = 1.472  CG 1it res=1.53e-13  ‖x‖=0.0015
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 100: E = -73.892243 ± 0.000176  β_x = 1.461  CG 1it res=9.41e-14  ‖x‖=0.0014
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 110: E = -73.892032 ± 0.000162  β_x = 1.607  CG 1it res=7.70e-14  ‖x‖=0.0013
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 120: E = -73.892334 ± 0.000151  β_x = 1.679  CG 1it res=5.66e-13  ‖x‖=0.0012
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 5/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 130: E = -73.892241 ± 0.000139  β_x = 1.507  CG 1it res=2.25e-13  ‖x‖=0.0011
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 140: E = -73.892278 ± 0.000129  β_x = 1.924  CG 1it res=4.29e-14  ‖x‖=0.0010
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 150: E = -73.892313 ± 0.000119  β_x = 2.010  CG 1it res=1.85e-13  ‖x‖=0.0009
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 160: E = -73.892575 ± 0.000111  β_x = 2.321  CG 1it res=4.29e-14  ‖x‖=0.0009
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 170: E = -73.892361 ± 0.000102  β_x = 2.304  CG 1it res=1.03e-13  ‖x‖=0.0008
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 180: E = -73.892407 ± 0.000094  β_x = 2.074  CG 1it res=1.20e-13  ‖x‖=0.0007
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 190: E = -73.892404 ± 0.000087  β_x = 1.960  CG 1it res=1.68e-13  ‖x‖=0.0007
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 200: E = -73.892392 ± 0.000080  β_x = 1.853  CG 1it res=2.60e-14  ‖x‖=0.0006
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 210: E = -73.892451 ± 0.000074  β_x = 1.931  CG 1it res=4.38e-14  ‖x‖=0.0006
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 220: E = -73.892542 ± 0.000069  β_x = 2.017  CG 1it res=1.47e-13  ‖x‖=0.0005
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 230: E = -73.892573 ± 0.000064  β_x = 1.816  CG 1it res=2.91e-13  ‖x‖=0.0005
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 240: E = -73.892435 ± 0.000059  β_x = 1.803  CG 1it res=3.30e-13  ‖x‖=0.0005
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 250: E = -73.892596 ± 0.000055  β_x = 1.789  CG 1it res=1.27e-13  ‖x‖=0.0004
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 260: E = -73.892490 ± 0.000050  β_x = 1.530  CG 1it res=4.96e-14  ‖x‖=0.0004
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 270: E = -73.892565 ± 0.000047  β_x = 1.522  CG 1it res=1.57e-13  ‖x‖=0.0004
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 280: E = -73.892577 ± 0.000043  β_x = 1.670  CG 1it res=1.78e-13  ‖x‖=0.0003
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Iter 290: E = -73.892612 ± 0.000040  β_x = 1.428  CG 1it res=1.47e-13  ‖x‖=0.0003
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      |   unique samples: 4/1000
+14:25:59      | Saved  → results/6/dimod/simulated_annealing/result_2d_h0.5_rbmfull_nh36_lr0.1_reg0.001_ns1000_seed1_iter300.json
+14:25:59      |   Final energy : -73.892627
+14:25:59      |   Exact energy : -73.998000
+14:25:59      |   Error        : 0.105373
+14:25:59      |   Checkpoint → checkpoints/6/dimod/simulated_annealing/full/checkpoint_2d_h0.5_rbmfull_nh36_lr0.1_iter0300.pkl
+14:25:59  [  42/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.1 custom/metropolis seed=42
+14:31:08      | <model.FullyConnectedRBM object at 0x713a1b0ffe00>
+14:31:08      | <ising.TransverseFieldIsing2D object at 0x713a216338c0>
+14:31:08      | None
+14:31:08      |   unique samples: 1000/1000
+14:31:08      | Iter   0: E = -72.141668 ± 0.258883  β_x = 2.000  CG 103it res=8.09e-09  ‖x‖=102.2427
+14:31:08      |   unique samples: 36/1000
+14:31:08      |   unique samples: 14/1000
+14:31:08      |   unique samples: 10/1000
+14:31:08      |   unique samples: 10/1000
+14:31:08      |   unique samples: 6/1000
+14:31:08      |   unique samples: 7/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter  10: E = -42.080975 ± 0.001302  β_x = 2.546  CG 1it res=8.21e-14  ‖x‖=0.0100
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter  20: E = -42.019489 ± 0.000908  β_x = 2.527  CG 1it res=2.07e-13  ‖x‖=0.0070
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter  30: E = -41.968450 ± 0.000637  β_x = 2.508  CG 1it res=6.36e-14  ‖x‖=0.0049
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter  40: E = -50.264060 ± 0.000430  β_x = 2.043  CG 1it res=2.37e-13  ‖x‖=0.0033
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 5/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 5/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      | Iter  50: E = -49.653675 ± 0.000325  β_x = 1.926  CG 1it res=2.27e-13  ‖x‖=0.0025
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter  60: E = -49.647851 ± 0.000226  β_x = 1.907  CG 1it res=2.20e-13  ‖x‖=0.0017
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter  70: E = -49.647984 ± 0.000154  β_x = 1.992  CG 1it res=2.36e-13  ‖x‖=0.0012
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 5/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter  80: E = -49.647668 ± 0.000106  β_x = 2.186  CG 1it res=8.81e-14  ‖x‖=0.0008
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter  90: E = -49.647572 ± 0.000072  β_x = 2.066  CG 1it res=3.77e-14  ‖x‖=0.0006
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 100: E = -49.647406 ± 0.000050  β_x = 1.767  CG 1it res=7.30e-14  ‖x‖=0.0004
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter 110: E = -49.647308 ± 0.000034  β_x = 1.587  CG 1it res=2.96e-14  ‖x‖=0.0003
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 5/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 6/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter 120: E = -49.647236 ± 0.000024  β_x = 1.654  CG 1it res=2.94e-13  ‖x‖=0.0002
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 5/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 130: E = -49.647175 ± 0.000016  β_x = 2.005  CG 1it res=2.09e-14  ‖x‖=0.0001
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 140: E = -48.910910 ± 0.000078  β_x = 2.431  CG 1it res=9.27e-14  ‖x‖=0.0006
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 150: E = -48.910681 ± 0.000056  β_x = 2.292  CG 1it res=1.58e-13  ‖x‖=0.0004
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter 160: E = -48.910610 ± 0.000040  β_x = 2.058  CG 1it res=1.22e-13  ‖x‖=0.0003
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 170: E = -48.910515 ± 0.000028  β_x = 1.848  CG 1it res=7.19e-14  ‖x‖=0.0002
+14:31:08      |   unique samples: 5/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 180: E = -48.910505 ± 0.000020  β_x = 2.134  CG 1it res=1.34e-13  ‖x‖=0.0002
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 190: E = -48.910488 ± 0.000014  β_x = 1.921  CG 1it res=8.12e-14  ‖x‖=0.0001
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter 200: E = -48.910478 ± 0.000010  β_x = 2.575  CG 1it res=9.28e-14  ‖x‖=0.0001
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 210: E = -48.910452 ± 0.000007  β_x = 2.312  CG 1it res=8.48e-14  ‖x‖=0.0001
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter 220: E = -48.910437 ± 0.000005  β_x = 2.180  CG 1it res=1.44e-13  ‖x‖=0.0000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 230: E = -48.910436 ± 0.000004  β_x = 1.958  CG 1it res=2.51e-14  ‖x‖=0.0000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter 240: E = -48.910426 ± 0.000003  β_x = 1.846  CG 1it res=2.83e-13  ‖x‖=0.0000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter 250: E = -48.910423 ± 0.000002  β_x = 1.832  CG 1it res=2.60e-13  ‖x‖=0.0000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 260: E = -48.910418 ± 0.000001  β_x = 1.818  CG 1it res=2.96e-13  ‖x‖=0.0000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 270: E = -48.910415 ± 0.000001  β_x = 1.995  CG 1it res=2.55e-13  ‖x‖=0.0000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Iter 280: E = -48.910416 ± 0.000001  β_x = 1.706  CG 1it res=2.90e-14  ‖x‖=0.0000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 4/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      | Iter 290: E = -48.910414 ± 0.000000  β_x = 1.872  CG 1it res=1.51e-13  ‖x‖=0.0000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 2/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      |   unique samples: 3/1000
+14:31:08      | Saved  → results/6/dimod/simulated_annealing/result_2d_h2.0_rbmfull_nh36_lr0.1_reg0.001_ns1000_seed42_iter300.json
+14:31:08      |   Final energy : -48.910412
+14:31:08      |   Exact energy : -88.376400
+14:31:08      |   Error        : 39.465988
+14:31:08      |   Checkpoint → checkpoints/6/dimod/simulated_annealing/full/checkpoint_2d_h2.0_rbmfull_nh36_lr0.1_iter0300.pkl
+14:31:08  [  43/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.1 dimod/simulated_annealing seed=1
+14:31:50      | <model.FullyConnectedRBM object at 0x70e85320be00>
+14:31:50      | <ising.TransverseFieldIsing2D object at 0x70e85974b8c0>
+14:31:50      | None
+14:31:50      |   unique samples: 1000/1000
+14:31:50      | Iter   0: E = -72.414892 ± 0.266634  β_x = 2.000  CG 102it res=9.63e-09  ‖x‖=102.4197
+14:31:50      |   unique samples: 17/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter  10: E = -83.032903 ± 0.001408  β_x = 1.990  CG 1it res=1.28e-13  ‖x‖=0.0111
+14:31:50      |   unique samples: 6/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter  20: E = -79.794873 ± 0.000868  β_x = 2.298  CG 1it res=1.14e-13  ‖x‖=0.0068
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter  30: E = -79.796136 ± 0.000627  β_x = 2.653  CG 1it res=4.38e-14  ‖x‖=0.0049
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter  40: E = -79.798247 ± 0.000456  β_x = 2.647  CG 1it res=3.09e-14  ‖x‖=0.0035
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter  50: E = -79.797727 ± 0.000327  β_x = 3.217  CG 1it res=2.86e-13  ‖x‖=0.0025
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter  60: E = -79.798765 ± 0.000238  β_x = 2.896  CG 1it res=2.08e-13  ‖x‖=0.0018
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter  70: E = -79.798068 ± 0.000169  β_x = 2.882  CG 1it res=1.57e-13  ‖x‖=0.0013
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter  80: E = -79.798646 ± 0.000123  β_x = 2.594  CG 1it res=3.78e-13  ‖x‖=0.0010
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 5/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter  90: E = -79.798702 ± 0.000089  β_x = 2.446  CG 1it res=2.29e-13  ‖x‖=0.0007
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 100: E = -79.798661 ± 0.000064  β_x = 2.556  CG 1it res=7.81e-14  ‖x‖=0.0005
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 110: E = -79.798686 ± 0.000046  β_x = 2.537  CG 1it res=5.36e-14  ‖x‖=0.0004
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 120: E = -79.798836 ± 0.000033  β_x = 2.404  CG 1it res=1.17e-14  ‖x‖=0.0003
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 130: E = -79.798827 ± 0.000024  β_x = 2.386  CG 1it res=1.52e-13  ‖x‖=0.0002
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 140: E = -79.798849 ± 0.000017  β_x = 2.624  CG 1it res=6.38e-14  ‖x‖=0.0001
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 150: E = -79.798862 ± 0.000013  β_x = 2.480  CG 1it res=3.33e-15  ‖x‖=0.0001
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 160: E = -79.798878 ± 0.000009  β_x = 2.344  CG 1it res=5.05e-14  ‖x‖=0.0001
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 170: E = -79.798890 ± 0.000007  β_x = 2.005  CG 1it res=2.17e-14  ‖x‖=0.0001
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 180: E = -79.798890 ± 0.000005  β_x = 1.995  CG 1it res=2.50e-13  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 190: E = -79.798896 ± 0.000003  β_x = 1.886  CG 1it res=2.74e-13  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 200: E = -79.798901 ± 0.000002  β_x = 1.782  CG 1it res=2.50e-13  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 210: E = -79.798904 ± 0.000002  β_x = 1.862  CG 1it res=1.12e-14  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 220: E = -79.798901 ± 0.000001  β_x = 1.593  CG 1it res=9.52e-15  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 230: E = -79.798904 ± 0.000001  β_x = 1.509  CG 1it res=2.70e-13  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 240: E = -79.798903 ± 0.000001  β_x = 1.743  CG 1it res=1.77e-19  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 250: E = -79.798904 ± 0.000000  β_x = 2.224  CG 1it res=3.43e-13  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 260: E = -79.798905 ± 0.000000  β_x = 2.102  CG 1it res=1.07e-13  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 270: E = -79.798905 ± 0.000000  β_x = 2.087  CG 1it res=9.29e-14  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 280: E = -79.798905 ± 0.000000  β_x = 1.977  CG 1it res=3.06e-13  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Iter 290: E = -79.798905 ± 0.000000  β_x = 1.963  CG 1it res=1.17e-13  ‖x‖=0.0000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      |   unique samples: 4/1000
+14:31:50      | Saved  → results/6/dimod/simulated_annealing/result_2d_h2.0_rbmfull_nh36_lr0.1_reg0.001_ns1000_seed1_iter300.json
+14:31:50      |   Final energy : -79.798906
+14:31:50      |   Exact energy : -88.376400
+14:31:50      |   Error        : 8.577494
+14:31:50      |   Checkpoint → checkpoints/6/dimod/simulated_annealing/full/checkpoint_2d_h2.0_rbmfull_nh36_lr0.1_iter0300.pkl
+14:31:50  [  44/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.1 dimod/simulated_annealing seed=42
+14:34:33    [signal 15] Terminating 20 active subprocess(es)...
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  26/48] size=6 nh=36 (α=1.00) rbm=full h=2.0 lr=0.1 custom/metropolis seed=42
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  23/48] size=6 nh=36 (α=1.00) rbm=full h=0.5 lr=0.01 dimod/simulated_annealing seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  25/48] size=6 nh=36 (α=1.00) rbm=full h=2.0 lr=0.1 custom/metropolis seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  33/48] size=8 nh=64 (α=1.00) rbm=full h=0.5 lr=0.1 custom/metropolis seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  30/48] size=6 nh=36 (α=1.00) rbm=full h=2.0 lr=0.01 custom/metropolis seed=42
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  29/48] size=6 nh=36 (α=1.00) rbm=full h=2.0 lr=0.01 custom/metropolis seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  24/48] size=6 nh=36 (α=1.00) rbm=full h=0.5 lr=0.01 dimod/simulated_annealing seed=42
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  43/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.1 dimod/simulated_annealing seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  42/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.1 custom/metropolis seed=42
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  31/48] size=6 nh=36 (α=1.00) rbm=full h=2.0 lr=0.01 dimod/simulated_annealing seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  39/48] size=8 nh=64 (α=1.00) rbm=full h=0.5 lr=0.01 dimod/simulated_annealing seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  32/48] size=6 nh=36 (α=1.00) rbm=full h=2.0 lr=0.01 dimod/simulated_annealing seed=42
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  36/48] size=8 nh=64 (α=1.00) rbm=full h=0.5 lr=0.1 dimod/simulated_annealing seed=42
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  41/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.1 custom/metropolis seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  34/48] size=8 nh=64 (α=1.00) rbm=full h=0.5 lr=0.1 custom/metropolis seed=42
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  38/48] size=8 nh=64 (α=1.00) rbm=full h=0.5 lr=0.01 custom/metropolis seed=42
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  44/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.1 dimod/simulated_annealing seed=42
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  35/48] size=8 nh=64 (α=1.00) rbm=full h=0.5 lr=0.1 dimod/simulated_annealing seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  37/48] size=8 nh=64 (α=1.00) rbm=full h=0.5 lr=0.01 custom/metropolis seed=1
+14:34:33    Attempt 1/2 failed (exit -15)
+14:34:33    Retrying (attempt 2/2) — [  40/48] size=8 nh=64 (α=1.00) rbm=full h=0.5 lr=0.01 dimod/simulated_annealing seed=42
+14:34:50    [signal 15] Terminating 20 active subprocess(es)...
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50  [  45/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.01 custom/metropolis seed=1
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50  [  46/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.01 custom/metropolis seed=42
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50  [  47/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.01 dimod/simulated_annealing seed=1
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50  [  48/48] size=8 nh=64 (α=1.00) rbm=full h=2.0 lr=0.01 dimod/simulated_annealing seed=42
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
+14:34:50    Attempt 2/2 failed (exit -15)
+14:34:50    All 2 attempts failed — skipping.
