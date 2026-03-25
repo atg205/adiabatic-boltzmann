@@ -89,6 +89,12 @@ Tests use N=4 (16 configs, enumerable exactly). Key checks:
 - `test_psi_ratio_consistent_with_log_psi`: fast `psi_ratio` must match `exp(log_psi(v_flip) - log_psi(v))`
 - `test_e_loc_sum_equals_matrix_row`: `E_loc(v)` must equal the corresponding Hamiltonian matrix row
 
+## Coding principles
+
+**No silent fallbacks.** Never default to a backup value, a zero, or any substitute when reading shared state (e.g. `time.json`, checkpoints, config files) fails. A silent fallback can corrupt experiment results or silently exceed resource budgets (e.g. QPU time). If something cannot be read or parsed correctly: log the error, skip the current experiment, and continue with the next one. Raise, don't swallow.
+
+**No defensive defaults on critical paths.** `except Exception: return 0` on a QPU budget read is a concrete example of what never to do — it makes the budget check always pass, burning real QPU time silently. The same principle applies to any shared resource or measurement.
+
 ### Environment
 
 - Python 3.13, virtualenv at `.venv/`

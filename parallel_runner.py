@@ -47,7 +47,7 @@ SEEDS = [1, 42]
 ITERATIONS = 300
 
 DWAVE_BUDGET_MS = 1_800_000  # 30 minutes in ms
-TIME_FILE = Path("src/time.json")
+TIME_FILE = Path("time.json")
 
 MAX_RETRIES = 2
 
@@ -55,18 +55,20 @@ MAX_RETRIES = 2
 # Thread-safe shared counters + locks
 # ---------------------------------------------------------------------------
 
-_log_lock    = threading.Lock()
-_qpu_lock    = threading.Lock()
-_count_lock  = threading.Lock()
-_procs_lock  = threading.Lock()
-_done   = 0
+_log_lock = threading.Lock()
+_qpu_lock = threading.Lock()
+_count_lock = threading.Lock()
+_procs_lock = threading.Lock()
+_done = 0
 _failed = 0
 _active_procs: list[subprocess.Popen] = []  # all live child processes
 
 
 def _shutdown(signum, frame):
     """Kill all tracked child processes on SIGTERM/SIGINT, then exit."""
-    log(f"  [signal {signum}] Terminating {len(_active_procs)} active subprocess(es)...")
+    log(
+        f"  [signal {signum}] Terminating {len(_active_procs)} active subprocess(es)..."
+    )
     with _procs_lock:
         for proc in _active_procs:
             try:
@@ -77,7 +79,7 @@ def _shutdown(signum, frame):
 
 
 signal.signal(signal.SIGTERM, _shutdown)
-signal.signal(signal.SIGINT,  _shutdown)
+signal.signal(signal.SIGINT, _shutdown)
 
 
 # ---------------------------------------------------------------------------
@@ -148,10 +150,7 @@ def _is_dwave(method: str) -> bool:
 
 
 def _read_qpu_time_ms() -> int:
-    try:
-        return int(json.loads(TIME_FILE.read_text()).get("time_ms", 0))
-    except Exception:
-        return 0
+    return int(json.loads(TIME_FILE.read_text()).get("time_ms"))
 
 
 def _check_qpu_budget() -> tuple[bool, int]:
@@ -225,7 +224,9 @@ def run_experiment(exp: dict, idx: int, total: int, dry_run: bool) -> bool:
         if attempt > 1:
             log(f"  Retrying (attempt {attempt}/{MAX_RETRIES}) — {label}")
 
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+        )
         with _procs_lock:
             _active_procs.append(proc)
 
