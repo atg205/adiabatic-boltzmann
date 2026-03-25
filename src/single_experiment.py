@@ -37,8 +37,8 @@ def main():
         ising = TransverseFieldIsing1D(args.size)
     elif args.model == "2d":
         ising = TransverseFieldIsing2D(args.size)
-
-    rbm = FullyConnectedRBM(n_visible, n_visible)
+    n_hidden = args.size
+    rbm = FullyConnectedRBM(n_visible, n_hidden)
 
     if args.sampler == "custom":
         sampler = ClassicalSampler(method=args.method)
@@ -51,18 +51,18 @@ def main():
 
     trainer_config = {
         "learning_rate": args.lr,
-        "n_iterations": 200,
+        "n_iterations": 300,
         "n_samples": 1000,
         "regularization": 1e-3,
         "stop_at_convergence": False,
     }
 
     ns_args = Namespace(
-        model="1d",
+        model=args.model,
         size=args.size,
         h=0.5,
-        rbm="pegasus",
-        n_hidden=args.size,
+        rbm="full",
+        n_hidden=n_hidden,
         sampler=args.sampler,
         sampling_method=args.method,
         iterations=300,

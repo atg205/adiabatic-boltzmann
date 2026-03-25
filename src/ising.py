@@ -249,7 +249,7 @@ class TransverseFieldIsing2D(IsingModel):
         L = self.linear_size
         N = self.size
         
-        if L <= 4:
+        if False and L <= 4:
             return self._exact_diag_2d()
         
         # Reference energies per spin for 2D TFIM (thermodynamic limit)
