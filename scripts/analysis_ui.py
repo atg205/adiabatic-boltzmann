@@ -59,6 +59,7 @@ def load_results(root: Path) -> list[dict]:
                 "grad_norm_curve": [float(x) for x in history.get("grad_norm", [])],
                 "cond_curve": [float(x) for x in history.get("s_condition_number", [])],
                 "weight_norm_curve": [float(x) for x in history.get("weight_norm", [])],
+                "cem": bool(config.get("cem", False)),
             }
         )
 
@@ -189,6 +190,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <select id="f-lr" onchange="applyFilters()"><option value="">All</option></select></div>
     <div class="fg"><label>Seed</label>
       <select id="f-seed" onchange="applyFilters()"><option value="">All</option></select></div>
+    <div class="fg"><label>CEM</label>
+      <select id="f-cem" onchange="applyFilters()"><option value="">All</option><option value="false">No CEM</option><option value="true">CEM</option></select></div>
     <span class="filter-badge" id="filter-badge"></span>
     <button id="btn-reset" onclick="resetFilters()">✕ Reset</button>
   </div>
@@ -277,6 +280,7 @@ function applyFilters(){
     reg:$('f-reg').value,
     lr:$('f-lr').value,
     seed:$('f-seed').value,
+    cem:$('f-cem').value,
   };
   ACTIVE=ALL_RUNS.filter(r=>
     (!fs.model||r.model===fs.model)&&
@@ -287,7 +291,8 @@ function applyFilters(){
     (!fs.n_samples||String(r.n_samples)===fs.n_samples)&&
     (!fs.reg||String(r.reg)===fs.reg)&&
     (!fs.lr||String(r.lr)===fs.lr)&&
-    (!fs.seed||String(r.seed)===fs.seed)
+    (!fs.seed||String(r.seed)===fs.seed)&&
+    (!fs.cem||String(r.cem)===fs.cem)
   );
   const nActive=Object.values(fs).filter(Boolean).length;
   const badge=$('filter-badge'),reset=$('btn-reset');
@@ -305,7 +310,7 @@ function applyFilters(){
 }
 
 function resetFilters(){
-  ['f-model','f-sampler','f-method','f-rbm','f-nhidden','f-nsamples','f-reg','f-lr','f-seed'].forEach(id=>$(id).value='');
+  ['f-model','f-sampler','f-method','f-rbm','f-nhidden','f-nsamples','f-reg','f-lr','f-seed','f-cem'].forEach(id=>$(id).value='');
   applyFilters();
 }
 

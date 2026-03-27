@@ -192,7 +192,19 @@ class Trainer:
         self.beta_min = config.get("beta_min", 0.05)
         self.beta_max = config.get("beta_max", 20.0)
 
-        self.stop_at_convergence = config.get("stop_at_convergence", True)
+        self.use_cem = config.get("use_cem", False)
+        self.cem_interval = config.get("cem_interval", 5)
+        self.cem_n_samples = config.get("cem_n_samples", 200)
+
+        if self.use_cem:
+            print(
+                f"  [CEM] β scheduling ENABLED — estimating β_eff every "
+                f"{self.cem_interval} iterations with {self.cem_n_samples} samples"
+            )
+        else:
+            print("  [CEM] β scheduling disabled — using heuristic beta_x adaptation")
+
+        self.stop_at_convergence = config.get("stop_at_convergence", False)
         self.conv_var_threshold = config.get("conv_var_threshold", 1e-4)
         self.conv_window = config.get("conv_window", 10)
         self.param_clip = config.get("param_clip", 3.0)
@@ -210,6 +222,7 @@ class Trainer:
             "weight_norm": [],
             "s_condition_number": [],
             "beta_x": [],
+            "beta_eff_cem": [],  # β_eff estimated by CEM; None on iterations where CEM didn't run
             "cg_iterations": [],
             "cg_residual": [],
         }
@@ -267,15 +280,29 @@ class Trainer:
 
             # ── 6. Adapt beta_x ────────────────────────────────────────────
             E_mean = float(np.mean(local_energies))
-            if prev_energy is not None and E_mean > prev_energy:
-                factor = (
-                    (1.0 + self.beta_adapt)
-                    if rng.random() < 0.5
-                    else (1.0 - self.beta_adapt)
+            beta_eff_this_iter = None
+
+            if self.use_cem and iteration % self.cem_interval == 0:
+                beta_eff = self.sampler.estimate_beta_eff(
+                    self.rbm, n_samples=self.cem_n_samples
                 )
-                self.beta_x = float(
-                    np.clip(self.beta_x * factor, self.beta_min, self.beta_max)
+                self.beta_x = float(np.clip(beta_eff, self.beta_min, self.beta_max))
+                beta_eff_this_iter = self.beta_x
+                print(
+                    f"  [CEM iter {iteration:3d}] β_eff = {beta_eff:.4f}"
+                    f" → beta_x = {self.beta_x:.4f}"
                 )
+            elif not self.use_cem:
+                if prev_energy is not None and E_mean > prev_energy:
+                    factor = (
+                        (1.0 + self.beta_adapt)
+                        if rng.random() < 0.5
+                        else (1.0 - self.beta_adapt)
+                    )
+                    self.beta_x = float(
+                        np.clip(self.beta_x * factor, self.beta_min, self.beta_max)
+                    )
+
             prev_energy = E_mean
 
             # ── 7. Metrics ─────────────────────────────────────────────────
@@ -293,6 +320,7 @@ class Trainer:
                 float(cg_info["residual_norm"])
             )  # CG residual proxy
             self.history["beta_x"].append(self.beta_x)
+            self.history["beta_eff_cem"].append(beta_eff_this_iter)
             self.history["cg_iterations"].append(int(cg_info["iterations"]))
             self.history["cg_residual"].append(float(cg_info["residual_norm"]))
 

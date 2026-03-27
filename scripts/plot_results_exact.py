@@ -91,6 +91,8 @@ def load_results(results_dir=RESULTS_DIR):
                 continue
             if n_hidden != n_visible:
                 continue
+            if config.get("cem", False):
+                continue
 
             method_name = f"{sampler}/{sampling_method}"
             # Key includes model, N, h, and RBM type

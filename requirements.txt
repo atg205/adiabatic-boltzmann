@@ -1,8 +1,9 @@
-dimod 
-matplotlib 
-numpy 
-pandas 
+dimod
+matplotlib
+numpy
+pandas
 dwave-neal
 scipy
 netket
 dwave-system
+simulated-bifurcation

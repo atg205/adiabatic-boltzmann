@@ -10,7 +10,7 @@ import numpy as np
 from pathlib import Path
 from helpers import save_results, save_rbm_checkpoint, restore_rbm_from_checkpoint
 from model import FullyConnectedRBM, DWaveTopologyRBM
-from sampler import ClassicalSampler, DimodSampler, VeloxSampler
+from sampler import ClassicalSampler, DimodSampler, VeloxSampler, LSBSampler
 from encoder import Trainer
 from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
 from argparse import Namespace
@@ -36,6 +36,22 @@ def parse_args():
     p.add_argument("--h", type=float, required=True, help="Transverse field strength.")
     p.add_argument("--iterations", type=int, default=300)
     p.add_argument("--rbm", choices=["full", "pegasus", "zephyr"], default="full")
+    p.add_argument("--lsb-sigma", type=float, default=1.0,
+                   help="LSB noise std σ (only used when --sampler lsb)")
+    p.add_argument("--lsb-steps", type=int, default=100,
+                   help="LSB steps per sample M (only used when --sampler lsb)")
+    p.add_argument("--sb-mode", choices=["discrete", "ballistic"], default="discrete",
+                   help="SBM algorithm variant (only used when --sampler custom --method sbm)")
+    p.add_argument("--sb-heated", action="store_true", default=False,
+                   help="Enable heated SBM variant")
+    p.add_argument("--sb-max-steps", type=int, default=10000,
+                   help="Max SBM iterations per agent")
+    p.add_argument("--sbm-steps", type=int, default=5000,
+                   help="SBM num_steps (only used when --sampler velox --method sbm)")
+    p.add_argument("--sbm-dt", type=float, default=1.0,
+                   help="SBM time step dt (only used when --sampler velox --method sbm)")
+    p.add_argument("--sbm-discrete", action="store_true", default=False,
+                   help="Use discrete SBM algorithm")
     p.add_argument("--resume", action="store_true",
                    help="Warm-start from the latest checkpoint matching this config, if one exists.")
     return p.parse_args()
@@ -74,11 +90,23 @@ def main():
         raise ValueError(f"Unknown RBM type: {args.rbm}")
 
     if args.sampler == "custom":
-        sampler = ClassicalSampler(method=args.method)
+        sampler = ClassicalSampler(
+            method=args.method,
+            sb_mode=args.sb_mode,
+            sb_heated=args.sb_heated,
+            sb_max_steps=args.sb_max_steps,
+        )
     elif args.sampler == "dimod":
         sampler = DimodSampler(method=args.method)
     elif args.sampler == "velox":
-        sampler = VeloxSampler(method=args.method)
+        sampler = VeloxSampler(
+            method=args.method,
+            sbm_steps=args.sbm_steps,
+            sbm_dt=args.sbm_dt,
+            sbm_discrete=args.sbm_discrete,
+        )
+    elif args.sampler == "lsb":
+        sampler = LSBSampler(sigma=args.lsb_sigma, n_steps=args.lsb_steps)
     else:
         raise ValueError(f"Unknown sampler: {args.sampler}")
 
@@ -105,6 +133,15 @@ def main():
         output_dir=args.output_dir,
         seed=args.seed,
         visualize=False,
+        cem=False,
+        lsb_sigma=args.lsb_sigma,
+        lsb_steps=args.lsb_steps,
+        sbm_steps=args.sbm_steps,
+        sbm_dt=args.sbm_dt,
+        sbm_discrete=args.sbm_discrete,
+        sb_mode=args.sb_mode,
+        sb_heated=args.sb_heated,
+        sb_max_steps=args.sb_max_steps,
     )
 
     if args.resume:

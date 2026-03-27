@@ -98,9 +98,13 @@ def save_results(args, history, ising):
     )
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    use_cem = getattr(args, "cem", False)
     results = {
         "config": vars(args),
-        "history": {k: [float(v) for v in vals] for k, vals in history.items()},
+        "history": {
+            k: [float(v) if v is not None else None for v in vals]
+            for k, vals in history.items()
+        },
         "final_energy": history["energy"][-1],
         "exact_energy": ising.exact_ground_energy(),
         "error": abs(history["energy"][-1] - ising.exact_ground_energy()),
@@ -118,6 +122,7 @@ def save_results(args, history, ising):
         f"_ns{args.n_samples}"
         f"_seed{args.seed}"
         f"_iter{args.iterations}"
+        f"_cem{int(use_cem)}"
         f".json"
     )
 

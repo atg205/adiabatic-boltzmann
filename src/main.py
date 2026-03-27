@@ -3,7 +3,7 @@ import numpy as np
 
 from helpers import save_results
 from model import FullyConnectedRBM, DWaveTopologyRBM
-from sampler import ClassicalSampler, DimodSampler, VeloxSampler
+from sampler import ClassicalSampler, DimodSampler, VeloxSampler, LSBSampler
 from encoder import Trainer
 from ising import TransverseFieldIsing1D, TransverseFieldIsing2D
 
@@ -50,7 +50,7 @@ def parse_arguments():
     # Sampling
     parser.add_argument(
         "--sampler",
-        choices=["custom", "dimod", "velox"],
+        choices=["custom", "dimod", "velox", "lsb"],
         default="dimod",
         help="Sampling backend",
     )
@@ -61,12 +61,20 @@ def parse_arguments():
             "zephyr",
             "metropolis",
             "velox",
+            "sbm",
             "simulated_annealing",
             "tabu",
         ],
         default="simulated_annealing",
         help="Classical sampling algorithm",
     )
+    # SBM-specific parameters (only used when --sampler velox --sampling-method sbm)
+    parser.add_argument("--sbm-steps", type=int, default=5000,
+                        help="SBM num_steps (iterations of the SBM dynamics)")
+    parser.add_argument("--sbm-dt", type=float, default=1.0,
+                        help="SBM time step dt")
+    parser.add_argument("--sbm-discrete", action="store_true", default=False,
+                        help="Use discrete version of SBM algorithm")
     parser.add_argument(
         "--n-samples", type=int, default=1000, help="Samples per iteration"
     )
@@ -80,6 +88,48 @@ def parse_arguments():
     )
     parser.add_argument(
         "--regularization", type=float, default=1e-5, help="SR matrix regularization"
+    )
+
+    # SBM (simulated-bifurcation library) hyperparameters — used when --sampler custom --sampling-method sbm
+    parser.add_argument("--sb-mode", choices=["discrete", "ballistic"], default="discrete",
+                        help="SBM algorithm variant")
+    parser.add_argument("--sb-heated", action="store_true", default=False,
+                        help="Enable heated SBM variant")
+    parser.add_argument("--sb-max-steps", type=int, default=10000,
+                        help="Max SBM iterations per agent")
+
+    # LSB hyperparameters
+    parser.add_argument(
+        "--lsb-sigma",
+        type=float,
+        default=1.0,
+        help="LSB noise std σ (controls exploration; β_eff estimated via CEM)",
+    )
+    parser.add_argument(
+        "--lsb-steps",
+        type=int,
+        default=100,
+        help="LSB steps per sample (M in the paper)",
+    )
+
+    # CEM beta scheduling
+    parser.add_argument(
+        "--cem",
+        action="store_true",
+        default=False,
+        help="Enable CEM-based β scheduling (estimates β_eff every --cem-interval iterations)",
+    )
+    parser.add_argument(
+        "--cem-interval",
+        type=int,
+        default=5,
+        help="Iterations between β_eff estimates when --cem is active",
+    )
+    parser.add_argument(
+        "--cem-n-samples",
+        type=int,
+        default=200,
+        help="Samples used for each β_eff estimate",
     )
 
     # Output
@@ -106,6 +156,9 @@ def main():
     print(f"  RBM: {args.rbm}")
     print(f"  Sampler: {args.sampler} ({args.sampling_method})")
     print(f"  Training: {args.iterations} iterations, lr={args.learning_rate}")
+    print(
+        f"  CEM β scheduling: {'ON (interval=' + str(args.cem_interval) + ')' if args.cem else 'OFF'}"
+    )
 
     # 1. Instantiate Ising model
     if args.model == "1d":
@@ -114,7 +167,15 @@ def main():
         ising = TransverseFieldIsing2D(args.size, args.h)
 
     # 2. Instantiate RBM
-    n_hidden = args.n_hidden or args.size
+    if args.n_hidden is not None:
+        n_hidden = args.n_hidden
+    elif args.model == "1d":
+        n_hidden = args.size
+    elif args.model == "2d":
+        n_hidden = args.size**2
+    else:
+        raise ValueError(f"Unsupported model type: {args.model}")
+
     n_visible = args.size if args.model == "1d" else args.size**2
     args.n_hidden = n_hidden
     if args.rbm == "full":
@@ -124,11 +185,23 @@ def main():
 
     # 3. Instantiate sampler
     if args.sampler == "custom":
-        sampler = ClassicalSampler(method=args.sampling_method)
+        sampler = ClassicalSampler(
+            method=args.sampling_method,
+            sb_mode=args.sb_mode,
+            sb_heated=args.sb_heated,
+            sb_max_steps=args.sb_max_steps,
+        )
     elif args.sampler == "dimod":
         sampler = DimodSampler(method=args.sampling_method)
     elif args.sampler == "velox":
-        sampler = VeloxSampler(method=args.sampling_method)
+        sampler = VeloxSampler(
+            method=args.sampling_method,
+            sbm_steps=args.sbm_steps,
+            sbm_dt=args.sbm_dt,
+            sbm_discrete=args.sbm_discrete,
+        )
+    elif args.sampler == "lsb":
+        sampler = LSBSampler(sigma=args.lsb_sigma, n_steps=args.lsb_steps)
 
     # 4. Build trainer config
     trainer_config = {
@@ -136,8 +209,11 @@ def main():
         "n_iterations": args.iterations,
         "n_samples": args.n_samples,
         "regularization": args.regularization,
-        "save_checkpoints": False,  # Enable checkpoint saving
-        "checkpoint_interval": 10,  # Save every 10 iterations
+        "save_checkpoints": False,
+        "checkpoint_interval": 10,
+        "use_cem": args.cem,
+        "cem_interval": args.cem_interval,
+        "cem_n_samples": args.cem_n_samples,
     }
 
     # 5. Create trainer and run

@@ -47,6 +47,17 @@ _NS = 1000
 SEEDS = [1, 42]
 ITERATIONS = 300
 
+LSB_SIGMA = 1.0   # noise std σ for LSBSampler
+LSB_STEPS = 100   # steps per sample M for LSBSampler
+
+SBM_STEPS    = 5000   # num_steps for VeloxQ SBMSolver
+SBM_DT       = 1.0   # dt for VeloxQ SBMSolver
+SBM_DISCRETE = False  # discrete_version for VeloxQ SBMSolver
+
+SB_MODE      = "discrete"  # simulated-bifurcation library mode ('discrete' or 'ballistic')
+SB_HEATED    = False       # heated variant for simulated-bifurcation
+SB_MAX_STEPS = 10000       # max steps per agent for simulated-bifurcation
+
 DWAVE_BUDGET_MS = 3_600_000  # 30 minutes in ms
 TIME_FILE = Path("time.json")
 
@@ -152,6 +163,10 @@ def _is_dwave(method: str) -> bool:
     return method in ("pegasus", "zephyr")
 
 
+def _is_lsb(sampler: str) -> bool:
+    return sampler == "lsb"
+
+
 def _read_qpu_time_ms() -> int:
     text = TIME_FILE.read_text().strip()
     try:
@@ -188,6 +203,7 @@ def result_exists(exp: dict) -> bool:
             f"_ns{_NS}"
             f"_seed{exp['seed']}"
             f"_iter{ITERATIONS}"
+            f"_cem0"
             f".json"
         )
     )
@@ -256,6 +272,19 @@ def run_experiment(exp: dict, idx: int, total: int, dry_run: bool) -> bool:
         "--rbm",
         exp["rbm"],
     ]
+
+    if _is_lsb(exp["sampler"]):
+        cmd += ["--lsb-sigma", str(LSB_SIGMA), "--lsb-steps", str(LSB_STEPS)]
+
+    if exp["sampler"] == "velox" and exp["method"] == "sbm":
+        cmd += ["--sbm-steps", str(SBM_STEPS), "--sbm-dt", str(SBM_DT)]
+        if SBM_DISCRETE:
+            cmd += ["--sbm-discrete"]
+
+    if exp["sampler"] == "custom" and exp["method"] == "sbm":
+        cmd += ["--sb-mode", SB_MODE, "--sb-max-steps", str(SB_MAX_STEPS)]
+        if SB_HEATED:
+            cmd += ["--sb-heated"]
 
     if dry_run:
         log(f"  [dry-run] {' '.join(cmd)}")
