@@ -31,7 +31,8 @@ import json
 import os
 import sys
 import traceback
-from concurrent.futures import ProcessPoolExecutor, as_completed
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 
@@ -82,8 +83,11 @@ _failed = 0
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 
+_print_lock = threading.Lock()
+
 def tlog(msg: str) -> None:
-    print(f"[{datetime.now():%H:%M:%S}] {msg}", flush=True)
+    with _print_lock:
+        print(f"[{datetime.now():%H:%M:%S}] {msg}", flush=True)
 
 
 def _unique_ratio(v: np.ndarray) -> float:
@@ -232,7 +236,7 @@ def run_grid(experiments: list[dict], workers: int) -> None:
     total = len(experiments)
     tlog(f"Phase 1 — grid search: {total} experiments on {workers} workers")
 
-    with ProcessPoolExecutor(max_workers=workers) as pool:
+    with ThreadPoolExecutor(max_workers=workers) as pool:
         futures = {
             pool.submit(worker, exp, i + 1, total): exp
             for i, exp in enumerate(experiments)
