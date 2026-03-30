@@ -36,8 +36,10 @@ def parse_args():
     p.add_argument("--h", type=float, required=True, help="Transverse field strength.")
     p.add_argument("--iterations", type=int, default=300)
     p.add_argument("--rbm", choices=["full", "pegasus", "zephyr"], default="full")
-    p.add_argument("--lsb-sigma", type=float, default=1.0,
-                   help="LSB noise std σ (only used when --sampler lsb)")
+    p.add_argument("--lsb-sigma", type=float, default=0.0,
+                   help="LSB noise std σ (0 = auto-scale to RMS of local fields)")
+    p.add_argument("--lsb-sigma-scale", type=float, default=1.0,
+                   help="Multiplier applied on top of auto-scaled σ")
     p.add_argument("--lsb-steps", type=int, default=100,
                    help="LSB steps per sample M (only used when --sampler lsb)")
     p.add_argument("--sb-mode", choices=["discrete", "ballistic"], default="discrete",
@@ -106,7 +108,11 @@ def main():
             sbm_discrete=args.sbm_discrete,
         )
     elif args.sampler == "lsb":
-        sampler = LSBSampler(sigma=args.lsb_sigma, n_steps=args.lsb_steps)
+        sampler = LSBSampler(
+            sigma=args.lsb_sigma,
+            n_steps=args.lsb_steps,
+            sigma_scale=args.lsb_sigma_scale,
+        )
     else:
         raise ValueError(f"Unknown sampler: {args.sampler}")
 
@@ -135,6 +141,7 @@ def main():
         visualize=False,
         cem=False,
         lsb_sigma=args.lsb_sigma,
+        lsb_sigma_scale=args.lsb_sigma_scale,
         lsb_steps=args.lsb_steps,
         sbm_steps=args.sbm_steps,
         sbm_dt=args.sbm_dt,

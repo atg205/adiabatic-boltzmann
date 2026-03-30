@@ -495,9 +495,25 @@ class LSBSampler(Sampler):
     temperature.  β_eff is unknown a priori and must be estimated via CEM.
     """
 
-    def __init__(self, sigma: float = 1.0, n_steps: int = 100):
+    def __init__(self, sigma: float = 0.0, n_steps: int = 100, sigma_scale: float = 1.0):
+        # sigma=0 (default) → auto-scale to RMS of local fields each call
         self.sigma = sigma
         self.n_steps = n_steps
+        self.sigma_scale = sigma_scale
+
+    def _adaptive_sigma(self, J: np.ndarray, f: np.ndarray, n_probe: int = 200) -> float:
+        """
+        Estimate σ as sigma_scale × RMS of local fields over random probe configs.
+
+        The LSB noise must be comparable to the local field magnitude so that
+        spins can flip against the field.  For a trained RBM, ||W|| grows during
+        training, so a fixed σ=1 becomes insufficient.  This measures the
+        actual field scale from the current weights.
+        """
+        rng = np.random.default_rng()
+        x = rng.choice(np.array([-1.0, 1.0]), size=(n_probe, J.shape[0]))
+        g = x @ J + f[None, :]
+        return float(np.sqrt(np.mean(g ** 2))) * self.sigma_scale
 
     def _build_ising(self, rbm, beta_x: float = 1.0):
         """
@@ -530,6 +546,9 @@ class LSBSampler(Sampler):
 
         J, f = self._build_ising(rbm, beta_x)
         rng = np.random.default_rng()
+
+        if sigma <= 0:
+            sigma = self._adaptive_sigma(J, f)
 
         # Initialise all chains uniformly in {-1, +1}
         x = rng.choice(np.array([-1.0, 1.0]), size=(n_samples, J.shape[0]))

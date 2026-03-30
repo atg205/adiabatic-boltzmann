@@ -18,6 +18,15 @@ import sys
 RESULTS_DIR = Path("results")
 PLOTS_DIR = Path("plots")
 
+METHOD_COLORS = {
+    "custom/metropolis":        "#1f77b4",
+    "custom/sbm":               "#e377c2",
+    "dimod/pegasus":            "#ff7f0e",
+    "dimod/simulated_annealing":"#2ca02c",
+    "dimod/zephyr":             "#d62728",
+    "velox/velox":              "#9467bd",
+}
+
 # Reference energies per spin for 2D TFIM (thermodynamic limit)
 # Source: Blöte & Deng (2002), Albuquerque et al. (2010)
 EXACT_ENERGY_2D_PER_SPIN = {
@@ -117,17 +126,9 @@ def plot_convergence_to_exact(results):
     # Get unique (model, N, h, rbm) combinations
     combos = sorted(results.keys())
 
-    # Color palette for different methods
-    colors = {
-        "custom/metropolis": "#1f77b4",
-        "dimod/pegasus": "#ff7f0e",
-        "dimod/simulated_annealing": "#2ca02c",
-        "dimod/zephyr": "#d62728",
-        "velox/velox": "#9467bd",
-    }
-    
+    colors = METHOD_COLORS
     figs = []
-    
+
     for model, N, h, rbm in combos:
         # Compute exact energy per spin
         print(f"Computing exact ground state energy for model={model}, N={N}, h={h}...")
@@ -219,17 +220,9 @@ def plot_rbm_comparison(results):
     for model, N, h, rbm in results.keys():
         nh_groups[(model, N, h)].append(rbm)
     
-    # Color palette for different methods
-    method_colors = {
-        "custom/metropolis": "#1f77b4",
-        "dimod/pegasus": "#ff7f0e",
-        "dimod/simulated_annealing": "#2ca02c",
-        "dimod/zephyr": "#d62728",
-        "velox/velox": "#9467bd",
-    }
-    
+    method_colors = METHOD_COLORS
     figs = []
-    
+
     for (model, N, h), rbm_list in nh_groups.items():
         if len(rbm_list) < 2:
             continue  # Skip if only one RBM type
@@ -319,13 +312,7 @@ def plot_summary_pages(results):
     each cell showing energy convergence and error side by side.
     Saved as plots/{model}/{rbm}/summary.png.
     """
-    colors = {
-        "custom/metropolis": "#1f77b4",
-        "dimod/pegasus": "#ff7f0e",
-        "dimod/simulated_annealing": "#2ca02c",
-        "dimod/zephyr": "#d62728",
-        "velox/velox": "#9467bd",
-    }
+    colors = METHOD_COLORS
 
     # Group (N, h) combos by (model, rbm)
     model_rbm_groups = defaultdict(list)
