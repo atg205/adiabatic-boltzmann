@@ -26,6 +26,9 @@ def load_results(root: Path) -> list[dict]:
             print(f"  [warn] skipping: {file}")
             continue
 
+        if not isinstance(data, dict) or "config" not in data:
+            print(f"  [warn] skipping (unexpected format): {file}")
+            continue
         config = data["config"]
         history = data["history"]
 
