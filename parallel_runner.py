@@ -12,6 +12,7 @@ Usage:
 """
 
 import argparse
+import json
 import logging
 import os
 import signal
@@ -31,18 +32,16 @@ LOG_FILE = "parallel_benchmark.log"
 SCRIPT = "src/single_experiment.py"
 
 # ── sweep axes ────────────────────────────────────────────────────────────────
-SIZES_1D = [8, 16, 32, 64]
-SIZES_2D = [4, 6, 8]
+SIZES_1D = [96, 128, 192, 256]
+SIZES_2D = []          # not running 2D in this sweep
 H_VALUES = [0.5, 1.0, 2.0]
 LEARNING_RATES = [0.1]
 SEEDS = [42]
 
 # ── (sampler, method, rbm) combos to run ─────────────────────────────────────
 COMBOS = [
+    ("custom", "metropolis", "full"),
     ("custom", "metropolis", "zephyr"),
-    ("dimod", "simulated_annealing", "zephyr"),
-    ("dimod", "zephyr", "zephyr"),
-    ("custom", "sbm", "zephyr"),
 ]
 
 # ── fixed hyperparameters ─────────────────────────────────────────────────────
@@ -56,13 +55,17 @@ SB_MODE = "discrete"  # beats ballistic at equal step budget
 SB_HEATED = False  # heated consistently hurts
 SB_MAX_STEPS = 500  # sweet spot: best reach-rate, zero divergence
 
+DWAVE_BUDGET_MS = 1_800_000  # 30 minutes in ms
+TIME_FILE = Path("src/time.json")
+
 MAX_RETRIES = 2
 
 # ---------------------------------------------------------------------------
 # Thread-safe shared counters + locks
 # ---------------------------------------------------------------------------
 
-_log_lock = threading.Lock()
+_log_lock   = threading.Lock()
+_qpu_lock   = threading.Lock()
 _count_lock = threading.Lock()
 _procs_lock = threading.Lock()
 _done = 0
@@ -153,6 +156,27 @@ def build_experiments() -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
+def _is_dwave(method: str) -> bool:
+    return method in ("pegasus", "zephyr")
+
+
+def _read_qpu_time_ms() -> int:
+    try:
+        return int(json.loads(TIME_FILE.read_text()).get("time_ms", 0))
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"QPU time file {TIME_FILE} not found — cannot enforce budget."
+        )
+    except Exception as exc:
+        raise RuntimeError(f"Failed to read QPU time from {TIME_FILE}: {exc}") from exc
+
+
+def _check_qpu_budget() -> tuple[bool, int]:
+    """Returns (budget_ok, used_ms). Must be called with _qpu_lock held."""
+    used = _read_qpu_time_ms()
+    return used < DWAVE_BUDGET_MS, used
+
+
 def result_exists(exp: dict) -> bool:
     """Return True if the result file for this experiment already exists."""
     path = (
@@ -197,7 +221,20 @@ def run_experiment(exp: dict, idx: int, total: int, dry_run: bool) -> bool:
             _done += 1
         return True
 
-    log(label)
+    # QPU budget check — serialised so parallel D-Wave jobs don't race
+    if _is_dwave(exp["method"]):
+        with _qpu_lock:
+            ok, used = _check_qpu_budget()
+            if not ok:
+                log(f"  [QPU BUDGET] {used / 60000:.2f} min used — skipping {label}")
+                with _count_lock:
+                    _failed += 1
+                return False
+        qpu_info = f"  QPU used={used / 60000:.2f}min"
+    else:
+        qpu_info = ""
+
+    log(f"{label}{qpu_info}")
 
     cmd = [
         "python3",
@@ -300,6 +337,8 @@ def main():
 
     experiments = build_experiments()
     total = len(experiments)
+    has_dwave = any(_is_dwave(m) for _, m, _ in COMBOS)
+    used_ms_start = _read_qpu_time_ms() if has_dwave else 0
 
     log("=" * 60)
     log(f"Parallel runner started : {datetime.now():%Y-%m-%d %H:%M:%S}")
@@ -314,6 +353,11 @@ def main():
         f"SBM config              : mode={SB_MODE}  heated={SB_HEATED}  max_steps={SB_MAX_STEPS}"
     )
     log(f"Iterations              : {ITERATIONS}  seeds={SEEDS}")
+    if has_dwave:
+        log(
+            f"QPU budget              : {DWAVE_BUDGET_MS / 60000:.1f} min  "
+            f"(used so far: {used_ms_start / 60000:.2f} min)"
+        )
     if args.dry_run:
         log("DRY RUN — no experiments will be executed")
     log("=" * 60)
@@ -333,11 +377,15 @@ def main():
                 with _count_lock:
                     _failed += 1
 
+    used_ms_end = _read_qpu_time_ms() if has_dwave else 0
     log("")
     log("=" * 60)
     log(f"Benchmark finished : {datetime.now():%Y-%m-%d %H:%M:%S}")
     log(f"Completed          : {_done} / {total}")
     log(f"Failed (skipped)   : {_failed}")
+    if has_dwave:
+        log(f"QPU time this run  : {(used_ms_end - used_ms_start) / 60000:.2f} min")
+        log(f"QPU time total     : {used_ms_end / 60000:.2f} min")
     log("=" * 60)
 
 

@@ -130,7 +130,7 @@ def run_experiment(args: Namespace) -> bool:
     try:
         trainer = Trainer(rbm, ising, sampler, trainer_config)
         history = trainer.train()
-        save_results(args, history, ising)
+        save_results(args, history, ising, rbm)
         return True
     except Exception as e:
         print(f"  ERROR: {e}")

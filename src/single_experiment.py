@@ -48,6 +48,8 @@ def parse_args():
                    help="Enable heated SBM variant")
     p.add_argument("--sb-max-steps", type=int, default=10000,
                    help="Max SBM iterations per agent")
+    p.add_argument("--gibbs-sweeps", type=int, default=10,
+                   help="Block Gibbs sweeps per sample call k (only used when --method gibbs)")
     p.add_argument("--sbm-steps", type=int, default=5000,
                    help="SBM num_steps (only used when --sampler velox --method sbm)")
     p.add_argument("--sbm-dt", type=float, default=1.0,
@@ -94,6 +96,7 @@ def main():
     if args.sampler == "custom":
         sampler = ClassicalSampler(
             method=args.method,
+            n_sweeps=args.gibbs_sweeps if args.method == "gibbs" else 1,
             sb_mode=args.sb_mode,
             sb_heated=args.sb_heated,
             sb_max_steps=args.sb_max_steps,
@@ -160,7 +163,7 @@ def main():
 
     trainer = Trainer(rbm, ising, sampler, trainer_config)
     history = trainer.train()
-    save_results(ns_args, history, ising)
+    save_results(ns_args, history, ising, rbm)
 
     ckpt_path = save_rbm_checkpoint(rbm, ns_args, args.iterations)
     print(f"  Checkpoint → {ckpt_path}")

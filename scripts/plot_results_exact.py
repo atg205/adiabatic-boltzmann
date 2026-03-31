@@ -440,21 +440,42 @@ def print_summary(results):
             print(f"    Final energy per spin: {np.mean(final_energies):.6f} ± {np.std(final_energies):.6f}")
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Plot VMC convergence results")
+    parser.add_argument(
+        "--rbm",
+        choices=["full", "pegasus", "zephyr"],
+        default=None,
+        help="Only plot results for this RBM type (default: all)",
+    )
+    parser.add_argument(
+        "--results",
+        type=Path,
+        default=RESULTS_DIR,
+        help="Path to results directory (default: results/)",
+    )
+    args = parser.parse_args()
+
     print("Loading results...")
-    results = load_results()
-    
+    results = load_results(args.results)
+
+    if args.rbm is not None:
+        results = {k: v for k, v in results.items() if k[3] == args.rbm}
+        print(f"Filtered to RBM={args.rbm}: {len(results)} combinations")
+
     print_summary(results)
-    
+
     print("\n" + "="*80)
     print("Generating convergence plots (one per N, h, RBM)...")
     print("="*80)
     figs1 = plot_convergence_to_exact(results)
-    
+
     print("\n" + "="*80)
     print("Generating RBM comparison plots (comparing RBMs for same N, h)...")
     print("="*80)
     figs2 = plot_rbm_comparison(results)
-    
+
     print("\n" + "="*80)
     print("Generating summary pages (one per model/RBM)...")
     print("="*80)

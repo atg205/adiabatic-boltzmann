@@ -63,6 +63,7 @@ def parse_arguments():
             "velox",
             "simulated_annealing",
             "tabu",
+            "gibbs",
         ],
         default="simulated_annealing",
         help="Classical sampling algorithm",
@@ -155,7 +156,12 @@ def main():
 
     # 3. Instantiate sampler
     if args.sampler == "custom":
-        sampler = ClassicalSampler(method=args.sampling_method)
+        sampler = ClassicalSampler(
+            method=args.sampling_method,
+            n_sweeps=getattr(args, "gibbs_sweeps", 10)
+            if args.sampling_method == "gibbs"
+            else 1,
+        )
     elif args.sampler == "dimod":
         sampler = DimodSampler(method=args.sampling_method)
     elif args.sampler == "velox":
@@ -172,7 +178,6 @@ def main():
         "use_cem": args.cem,
         "cem_interval": args.cem_interval,
         "cem_n_samples": args.cem_n_samples,
-        ""
     }
 
     # 5. Create trainer and run
@@ -180,7 +185,7 @@ def main():
 
     print(f"\nStarting training...")
     history = trainer.train()
-    save_results(args, history, ising)
+    save_results(args, history, ising, rbm)
     if args.rbm != "full":
         print(f"sparsity: {rbm.connectivity_summary()['sparsity']}")
 

@@ -91,7 +91,7 @@ def restore_rbm_from_checkpoint(rbm, checkpoint_path):
     return iteration
 
 
-def save_results(args, history, ising):
+def save_results(args, history, ising, rbm=None):
     # Directory structure: results/size/sampler/sampling_method/
     output_dir = Path(
         f"{args.output_dir}/{args.size}/{args.sampler}/{args.sampling_method}"
@@ -108,6 +108,8 @@ def save_results(args, history, ising):
         "final_energy": history["energy"][-1],
         "exact_energy": ising.exact_ground_energy(),
         "error": abs(history["energy"][-1] - ising.exact_ground_energy()),
+        "sparsity": float(rbm.sparsity()) if rbm is not None else None,
+        "sampling_time_s": float(sum(history.get("sampling_time_s", []))),
     }
 
     # Filename encodes every axis that varies in the sweep

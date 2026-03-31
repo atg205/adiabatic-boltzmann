@@ -1,4 +1,5 @@
 import math
+import time
 import numpy as np
 from helpers import save_rbm_checkpoint
 
@@ -225,6 +226,7 @@ class Trainer:
             "beta_eff_cem": [],  # β_eff estimated by CEM; None on iterations where CEM didn't run
             "cg_iterations": [],
             "cg_residual": [],
+            "sampling_time_s": [],
         }
 
     def train(self) -> dict:
@@ -234,11 +236,13 @@ class Trainer:
         for iteration in range(self.n_iterations):
             # ── 1. Sample ──────────────────────────────────────────────────
             try:
+                _t0 = time.perf_counter()
                 samples = self.sampler.sample(
                     self.rbm,
                     self.n_samples,
                     config={"beta_x": self.beta_x},
                 )
+                self.history["sampling_time_s"].append(time.perf_counter() - _t0)
             except Exception as e:
                 print(f"  [Trainer] Sampling failed at iteration {iteration}: {e}")
                 print("  [Trainer] Aborting this experiment.")

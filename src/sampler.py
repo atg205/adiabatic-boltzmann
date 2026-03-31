@@ -1,9 +1,24 @@
 import fcntl
 import json
+import math as _math
 import numpy as np
 from abc import ABC, abstractmethod
 from model import RBM
 import dimod
+
+try:
+    import numba as nb
+    _HAS_NUMBA = True
+except ImportError:
+    _HAS_NUMBA = False
+
+try:
+    import cupy as cp
+    _xp = cp
+    _DEVICE = "gpu"
+except ImportError:
+    _xp = np
+    _DEVICE = "cpu"
 import neal
 from dwave.samplers import TabuSampler
 from veloxq_sdk import VeloxQSolver, SBMSolver, SBMParameters
@@ -11,6 +26,62 @@ from veloxq_sdk.config import load_config, VeloxQAPIConfig
 from pathlib import Path
 from helpers import get_solver_name
 from scipy.optimize import minimize_scalar
+
+
+def _logcosh_xp(xp, x):
+    """Device-agnostic logcosh: works with numpy or cupy arrays."""
+    ax = xp.abs(x)
+    return ax + xp.log1p(xp.exp(-2.0 * ax))
+
+
+if _HAS_NUMBA:
+    @nb.njit(cache=True)
+    def _mh_sweep_nb(v, theta, W, a, flip_indices, rand_u):
+        """Numba-compiled MH sweep. Mutates v and theta in-place. Returns n_accepted."""
+        n_accepted = 0
+        Nh = theta.shape[0]
+        for k in range(flip_indices.shape[0]):
+            i = flip_indices[k]
+            vi = v[i]
+            log_ratio = a[i] * vi
+            for j in range(Nh):
+                tf = theta[j] - 2.0 * vi * W[i, j]
+                t = theta[j]
+                atf = abs(tf)
+                at = abs(t)
+                log_ratio += 0.5 * (atf + _math.log1p(_math.exp(-2.0 * atf))
+                                    - at  - _math.log1p(_math.exp(-2.0 * at)))
+            log_accept = 2.0 * log_ratio
+            if rand_u[k] < (1.0 if log_accept >= 0.0 else _math.exp(log_accept)):
+                v[i] = -vi
+                for j in range(Nh):
+                    theta[j] -= 2.0 * vi * W[i, j]
+                n_accepted += 1
+        return n_accepted
+
+    @nb.njit(cache=True)
+    def _sa_sweep_nb(v, theta, W, a, flip_indices, rand_u, T):
+        """Numba-compiled SA sweep. Mutates v and theta in-place. Returns n_accepted."""
+        n_accepted = 0
+        Nh = theta.shape[0]
+        for k in range(flip_indices.shape[0]):
+            i = flip_indices[k]
+            vi = v[i]
+            log_ratio = a[i] * vi
+            for j in range(Nh):
+                tf = theta[j] - 2.0 * vi * W[i, j]
+                t = theta[j]
+                atf = abs(tf)
+                at = abs(t)
+                log_ratio += 0.5 * (atf + _math.log1p(_math.exp(-2.0 * atf))
+                                    - at  - _math.log1p(_math.exp(-2.0 * at)))
+            log_accept = 2.0 * log_ratio / T
+            if rand_u[k] < (1.0 if log_accept >= 0.0 else _math.exp(log_accept)):
+                v[i] = -vi
+                for j in range(Nh):
+                    theta[j] -= 2.0 * vi * W[i, j]
+                n_accepted += 1
+        return n_accepted
 
 
 def _cem_fit_beta(h_mean: np.ndarray, activation: np.ndarray) -> float:
@@ -134,11 +205,14 @@ class ClassicalSampler(Sampler):
         sb_mode: str = "discrete",
         sb_heated: bool = False,
         sb_max_steps: int = 10000,
+        gibbs_collapse_threshold: float = 0.2,
+        gibbs_reinit_fraction: float = 0.5,
     ):
         """
-        method:       'metropolis' | 'simulated_annealing' | 'sbm'
-        n_warmup:     equilibration sweeps (metropolis / SA only)
-        n_sweeps:     sweeps between samples (metropolis / SA only)
+        method:       'metropolis' | 'simulated_annealing' | 'sbm' | 'gibbs'
+        n_warmup:     equilibration sweeps (metropolis / SA / gibbs only)
+        n_sweeps:     sweeps between samples (metropolis / SA only);
+                      for gibbs this is the number of block sweeps per call (k)
         sb_mode:      SBM algorithm variant — 'discrete' or 'ballistic'
         sb_heated:    enable heated variant of SBM
         sb_max_steps: max SBM iterations per agent
@@ -151,6 +225,11 @@ class ClassicalSampler(Sampler):
         self.sb_mode = sb_mode
         self.sb_heated = sb_heated
         self.sb_max_steps = sb_max_steps
+        self.gibbs_collapse_threshold = gibbs_collapse_threshold
+        self.gibbs_reinit_fraction = gibbs_reinit_fraction
+
+        # Persistent chain state for Gibbs sampler (initialised on first call)
+        self._gibbs_v = None   # (_xp array) (n_chains, n_visible)
 
     def sample(self, rbm: RBM, n_samples: int, config: dict = None, return_hidden: bool = False):
         if config is None:
@@ -158,6 +237,12 @@ class ClassicalSampler(Sampler):
 
         if self.method == "sbm":
             v, h = self._sbm_sample(rbm, n_samples, config)
+            if return_hidden:
+                return v, h
+            return v
+
+        if self.method == "gibbs":
+            v, h = self._gibbs_sample(rbm, n_samples, config)
             if return_hidden:
                 return v, h
             return v
@@ -234,6 +319,84 @@ class ClassicalSampler(Sampler):
         print(f"  [SBM]   mode={mode} heated={heated} unique={unique}/{n_samples}")
         return v, h
 
+    def _gibbs_sample(self, rbm: RBM, n_samples: int, config: dict):
+        """
+        Persistent block Gibbs sampler (PCD-k) targeting |Ψ(v)|².
+
+        Samples the joint (v, h) distribution with ±1 spins:
+            p(v, h) ∝ exp(-a·v + b·h + v·W·h)
+
+        Block conditionals (all units independent within each block):
+            p(h_j = +1 | v) = σ( 2(b_j + W[:,j]·v) )
+            p(v_i = +1 | h) = σ( 2(W[i,:]·h  - a_i) )
+
+        Note: no beta_x scaling — Gibbs is exact at T=1 by construction.
+        The trainer's beta_x adaptation is ignored here.
+
+        GPU: if CuPy is available all arrays live on the GPU; otherwise
+        NumPy is used transparently (same code path via _xp).
+        """
+        n_sweeps = config.get("n_sweeps", self.n_sweeps)
+        n_warmup = config.get("n_warmup", self.n_warmup)
+
+        Nv, Nh = rbm.n_visible, rbm.n_hidden
+        W = _xp.asarray(rbm.W)
+        a = _xp.asarray(rbm.a)
+        b = _xp.asarray(rbm.b)
+
+        rng = np.random.default_rng()
+
+        def _h_given_v(V):
+            """Sample H ~ p(h|v).  V: (C, Nv) → H: (C, Nh)"""
+            prob = 1.0 / (1.0 + _xp.exp(-2.0 * (V @ W + b[None, :])))
+            u = _xp.asarray(rng.random((V.shape[0], Nh)))
+            return _xp.where(u < prob, 1.0, -1.0)
+
+        def _v_given_h(H):
+            """Sample V ~ p(v|h).  H: (C, Nh) → V: (C, Nv)"""
+            prob = 1.0 / (1.0 + _xp.exp(-2.0 * (H @ W.T - a[None, :])))
+            u = _xp.asarray(rng.random((H.shape[0], Nv)))
+            return _xp.where(u < prob, 1.0, -1.0)
+
+        def _init_chains(n: int):
+            """Random ±1 init, warmed up for n_warmup sweeps."""
+            V_ = _xp.asarray(rng.choice([-1.0, 1.0], size=(n, Nv)))
+            for _ in range(n_warmup):
+                V_ = _v_given_h(_h_given_v(V_))
+            return V_
+
+        # Initialise or reinitialise persistent chains when shape changes
+        if self._gibbs_v is None or self._gibbs_v.shape != (n_samples, Nv):
+            self._gibbs_v = _init_chains(n_samples)
+
+        V = self._gibbs_v
+
+        # PCD-k: k block Gibbs sweeps from current chain state
+        for _ in range(n_sweeps):
+            V = _v_given_h(_h_given_v(V))
+
+        # Collapse detection: reinitialise stuck chains
+        v_np = _xp.asnumpy(V) if _xp is not np else np.asarray(V)
+        unique = len(set(map(tuple, v_np.tolist())))
+        restarted = 0
+        if unique < self.gibbs_collapse_threshold * n_samples:
+            n_reinit = int(self.gibbs_reinit_fraction * n_samples)
+            idx = rng.choice(n_samples, n_reinit, replace=False)
+            V[idx] = _init_chains(n_reinit)
+            restarted = n_reinit
+            v_np = _xp.asnumpy(V) if _xp is not np else np.asarray(V)
+            unique = len(set(map(tuple, v_np.tolist())))
+
+        self._gibbs_v = V
+
+        # Sample H once from final V to return joint samples
+        H = _h_given_v(V)
+        h_np = _xp.asnumpy(H) if _xp is not np else np.asarray(H)
+
+        restart_str = f"  restarted={restarted}" if restarted else ""
+        print(f"  [Gibbs] device={_DEVICE}  k={n_sweeps}  unique={unique}/{n_samples}{restart_str}")
+        return v_np, h_np
+
     def _sample_hidden(self, rbm: RBM, v_samples: np.ndarray) -> np.ndarray:
         """Sample h ~ p(h|v) at β=1 for each visible sample."""
         activation = rbm.b[None, :] + v_samples @ rbm.W  # (n_samples, n_hidden)
@@ -280,29 +443,49 @@ class ClassicalSampler(Sampler):
         - n_warmup: equilibration sweeps (overrides __init__ value)
         - n_sweeps: sweeps between collected samples (overrides __init__ value)
         """
+        if _DEVICE == "gpu":
+            return self._metropolis_hastings_batched(rbm, n_samples, config)
+
         N = rbm.n_visible
         n_warmup = config.get("n_warmup", self.n_warmup)
         n_sweeps = config.get("n_sweeps", self.n_sweeps)
         rng = np.random.default_rng()
 
         v = rng.choice([-1.0, 1.0], size=N)
+        # Ensure C-contiguous float64 for Numba
+        W_cont = np.ascontiguousarray(rbm.W, dtype=np.float64)
+        a_cont = np.ascontiguousarray(rbm.a, dtype=np.float64)
 
         n_accepted = 0
         n_proposed = 0
 
-        def sweep(v):
+        def sweep(v, theta):
+            """One sweep with cached theta = b + W.T @ v, updated incrementally."""
             nonlocal n_accepted, n_proposed
-            for flip_idx in rng.integers(0, N, size=N):
-                ratio_sq = rbm.psi_ratio(v, flip_idx) ** 2
-                n_proposed += 1
-                if rng.random() < min(1.0, ratio_sq):
-                    v[flip_idx] *= -1
-                    n_accepted += 1
-            return v
+            n_proposed += N
+            flip_indices = rng.integers(0, N, size=N).astype(np.int64)
+            rand_u = rng.random(N)
+            if _HAS_NUMBA:
+                n_accepted += _mh_sweep_nb(v, theta, W_cont, a_cont, flip_indices, rand_u)
+            else:
+                for k in range(N):
+                    flip_idx = flip_indices[k]
+                    vi = v[flip_idx]
+                    theta_flip = theta - 2.0 * vi * rbm.W[flip_idx, :]
+                    log_ratio = rbm.a[flip_idx] * vi + 0.5 * np.sum(
+                        rbm.logcosh(theta_flip) - rbm.logcosh(theta)
+                    )
+                    if rand_u[k] < min(1.0, np.exp(2.0 * log_ratio)):
+                        v[flip_idx] *= -1
+                        theta[:] = theta_flip
+                        n_accepted += 1
+            return v, theta
 
         # Warmup — equilibrate from random initial state
+        theta = np.ascontiguousarray(rbm.b + rbm.W.T @ v, dtype=np.float64)
+        v = v.astype(np.float64)
         for _ in range(n_warmup):
-            sweep(v)
+            v, theta = sweep(v, theta)
 
         # Reset counters so acceptance rate reflects collection phase only
         n_accepted = 0
@@ -312,7 +495,7 @@ class ClassicalSampler(Sampler):
         samples = []
         for _ in range(n_samples):
             for _ in range(n_sweeps):
-                sweep(v)
+                v, theta = sweep(v, theta)
             samples.append(v.copy())
 
         acceptance_rate = n_accepted / max(n_proposed, 1)
@@ -322,6 +505,84 @@ class ClassicalSampler(Sampler):
         )
 
         return np.array(samples)
+
+    def _metropolis_hastings_batched(self, rbm: RBM, n_samples: int, config: dict) -> np.ndarray:
+        """
+        Batched Metropolis-Hastings: all n_samples chains run in parallel on the GPU.
+
+        Each chain is independent and starts from a random state, runs n_warmup sweeps
+        to equilibrate, then n_sweeps more sweeps before its final state is collected
+        as a sample.  One sweep = N single-spin-flip proposals per chain.
+
+        Parallelism: at each proposal step, all C chains propose a (possibly different)
+        spin flip simultaneously → (C, Nh) tensor operations, mapped to GPU cores.
+
+        Device: uses CuPy (_xp = cp) when available, NumPy otherwise — same code path.
+        """
+        xp = _xp
+        N, Nh = rbm.n_visible, rbm.n_hidden
+        C = n_samples
+        n_warmup = config.get("n_warmup", self.n_warmup)
+        n_sweeps = config.get("n_sweeps", self.n_sweeps)
+
+        W = xp.asarray(rbm.W, dtype=np.float64)   # (N, Nh)
+        a = xp.asarray(rbm.a, dtype=np.float64)   # (N,)
+        b = xp.asarray(rbm.b, dtype=np.float64)   # (Nh,)
+
+        # Initialise C independent chains with random ±1 spins
+        v = (xp.random.randint(0, 2, (C, N)) * 2 - 1).astype(np.float64)  # (C, N)
+        theta = b[None, :] + v @ W                # (C, Nh)
+        ci = xp.arange(C)
+
+        n_accepted_total = 0
+        n_proposed_total = 0
+
+        def sweep(v, theta):
+            nonlocal n_accepted_total, n_proposed_total
+            n_proposed_total += C * N
+            for _ in range(N):
+                # Draw one random flip site per chain
+                flip_idx = xp.random.randint(0, N, (C,))           # (C,)
+                vi = v[ci, flip_idx]                                 # (C,)
+                W_row = W[flip_idx]                                  # (C, Nh)
+
+                # Compute theta if this flip were accepted (O(C*Nh), fully vectorised)
+                theta_flip = theta - 2.0 * vi[:, None] * W_row      # (C, Nh)
+
+                # Log acceptance ratio: 2 * [ a_i * v_i + 0.5 * Σ_j Δlogcosh_j ]
+                lc_diff = 0.5 * xp.sum(
+                    _logcosh_xp(xp, theta_flip) - _logcosh_xp(xp, theta), axis=1
+                )                                                    # (C,)
+                log_ratio = a[flip_idx] * vi + lc_diff               # (C,)
+
+                # Accept with probability min(1, exp(2*log_ratio))
+                accept = xp.log(xp.random.rand(C)) < 2.0 * log_ratio  # (C,) bool
+
+                # Update v and theta only for accepted chains
+                v[ci, flip_idx] = xp.where(accept, -vi, vi)
+                theta = xp.where(accept[:, None], theta_flip, theta)
+                n_accepted_total += int(xp.sum(accept))
+            return v, theta
+
+        for _ in range(n_warmup):
+            v, theta = sweep(v, theta)
+
+        # Reset acceptance counters — only measure collection phase
+        n_accepted_total = 0
+        n_proposed_total = 0
+
+        for _ in range(n_sweeps):
+            v, theta = sweep(v, theta)
+
+        acceptance_rate = n_accepted_total / max(n_proposed_total, 1)
+        # Transfer to CPU
+        v_np = xp.asnumpy(v) if xp is not np else np.asarray(v)
+        unique = len(set(map(tuple, v_np.tolist())))
+        print(
+            f"  [MH-batch] device={_DEVICE}  acceptance={acceptance_rate:.3f}  "
+            f"unique={unique}/{n_samples}"
+        )
+        return v_np
 
     def _simulated_annealing(
         self, rbm: RBM, n_samples: int, config: dict
@@ -351,6 +612,9 @@ class ClassicalSampler(Sampler):
         - n_warmup:   sweeps at T_initial before schedule starts (default: 50)
         - n_sweeps:   sweeps between collected samples during cooling (default: 1)
         """
+        if _DEVICE == "gpu":
+            return self._simulated_annealing_batched(rbm, n_samples, config)
+
         N = rbm.n_visible
         T_initial = config.get(
             "T_initial", self.T_initial if hasattr(self, "T_initial") else 5.0
@@ -363,6 +627,9 @@ class ClassicalSampler(Sampler):
         rng = np.random.default_rng()
 
         v = rng.choice([-1.0, 1.0], size=N)
+        # Ensure C-contiguous float64 for Numba
+        W_cont = np.ascontiguousarray(rbm.W, dtype=np.float64)
+        a_cont = np.ascontiguousarray(rbm.a, dtype=np.float64)
 
         # Geometric cooling schedule: T(step) = T_initial * (T_final/T_initial)^(step/n_steps)
         n_steps = n_samples * n_sweeps
@@ -375,22 +642,33 @@ class ClassicalSampler(Sampler):
         n_accepted = 0
         n_proposed = 0
 
-        def sweep(v, T):
+        def sweep(v, theta, T):
+            """One sweep with cached theta = b + W.T @ v, updated incrementally."""
             nonlocal n_accepted, n_proposed
-            for flip_idx in rng.integers(0, N, size=N):
-                ratio_sq = rbm.psi_ratio(v, flip_idx) ** 2
-                n_proposed += 1
-                # At T=1: standard Metropolis acceptance = min(1, ratio²)
-                # At T>1: acceptance = min(1, ratio^(2/T)) — flatter, more exploratory
-                accept_prob = min(1.0, ratio_sq ** (1.0 / T))
-                if rng.random() < accept_prob:
-                    v[flip_idx] *= -1
-                    n_accepted += 1
-            return v
+            n_proposed += N
+            flip_indices = rng.integers(0, N, size=N).astype(np.int64)
+            rand_u = rng.random(N)
+            if _HAS_NUMBA:
+                n_accepted += _sa_sweep_nb(v, theta, W_cont, a_cont, flip_indices, rand_u, T)
+            else:
+                for k in range(N):
+                    flip_idx = flip_indices[k]
+                    vi = v[flip_idx]
+                    theta_flip = theta - 2.0 * vi * rbm.W[flip_idx, :]
+                    log_ratio = rbm.a[flip_idx] * vi + 0.5 * np.sum(
+                        rbm.logcosh(theta_flip) - rbm.logcosh(theta)
+                    )
+                    if rand_u[k] < min(1.0, np.exp(2.0 * log_ratio / T)):
+                        v[flip_idx] *= -1
+                        theta[:] = theta_flip
+                        n_accepted += 1
+            return v, theta
 
         # Warmup at T_initial — equilibrate before cooling
+        theta = np.ascontiguousarray(rbm.b + rbm.W.T @ v, dtype=np.float64)
+        v = v.astype(np.float64)
         for _ in range(n_warmup):
-            sweep(v, T_initial)
+            v, theta = sweep(v, theta, T_initial)
 
         n_accepted = 0
         n_proposed = 0
@@ -401,7 +679,7 @@ class ClassicalSampler(Sampler):
         for _ in range(n_samples):
             for _ in range(n_sweeps):
                 T = schedule(step)
-                sweep(v, T)
+                v, theta = sweep(v, theta, T)
                 step += 1
             samples.append(v.copy())
 
@@ -414,6 +692,70 @@ class ClassicalSampler(Sampler):
         )
 
         return np.array(samples)
+
+    def _simulated_annealing_batched(self, rbm: RBM, n_samples: int, config: dict) -> np.ndarray:
+        """
+        Batched SA: C chains cooled in parallel on GPU (or CPU via NumPy).
+
+        All chains share the same geometric cooling schedule.  After n_warmup
+        sweeps at T_initial, the schedule runs for n_samples * n_sweeps sweeps
+        and the final state of each chain is returned as a sample.
+        """
+        xp = _xp
+        N, Nh = rbm.n_visible, rbm.n_hidden
+        C = n_samples
+        T_initial = config.get("T_initial", self.T_initial if hasattr(self, "T_initial") else 5.0)
+        T_final   = config.get("T_final",   self.T_final   if hasattr(self, "T_final")   else 1.0)
+        n_warmup  = config.get("n_warmup",  self.n_warmup)
+        n_sweeps  = config.get("n_sweeps",  self.n_sweeps)
+
+        W = xp.asarray(rbm.W, dtype=np.float64)
+        a = xp.asarray(rbm.a, dtype=np.float64)
+        b = xp.asarray(rbm.b, dtype=np.float64)
+
+        v = (xp.random.randint(0, 2, (C, N)) * 2 - 1).astype(np.float64)
+        theta = b[None, :] + v @ W
+        ci = xp.arange(C)
+
+        n_total_steps = n_samples * n_sweeps
+
+        def schedule(step):
+            if T_initial == T_final:
+                return T_final
+            return T_initial * (T_final / T_initial) ** (step / max(n_total_steps - 1, 1))
+
+        def sweep(v, theta, T):
+            for _ in range(N):
+                flip_idx  = xp.random.randint(0, N, (C,))
+                vi        = v[ci, flip_idx]
+                W_row     = W[flip_idx]
+                theta_flip = theta - 2.0 * vi[:, None] * W_row
+                lc_diff   = 0.5 * xp.sum(
+                    _logcosh_xp(xp, theta_flip) - _logcosh_xp(xp, theta), axis=1
+                )
+                log_ratio = a[flip_idx] * vi + lc_diff
+                accept    = xp.log(xp.random.rand(C)) < 2.0 * log_ratio / T
+                v[ci, flip_idx] = xp.where(accept, -vi, vi)
+                theta = xp.where(accept[:, None], theta_flip, theta)
+            return v, theta
+
+        for _ in range(n_warmup):
+            v, theta = sweep(v, theta, T_initial)
+
+        step = 0
+        for _ in range(n_samples):
+            for _ in range(n_sweeps):
+                v, theta = sweep(v, theta, schedule(step))
+                step += 1
+
+        v_np = xp.asnumpy(v) if xp is not np else np.asarray(v)
+        unique = len(set(map(tuple, v_np.tolist())))
+        T_now = schedule(step - 1)
+        print(
+            f"  [SA-batch] device={_DEVICE}  T: {T_initial:.2f}→{T_now:.2f}  "
+            f"unique={unique}/{n_samples}"
+        )
+        return v_np
 
 
 class VeloxSampler(Sampler):
