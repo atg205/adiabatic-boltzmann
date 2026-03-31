@@ -39,22 +39,22 @@ SEEDS = [42]
 
 # ── (sampler, method, rbm) combos to run ─────────────────────────────────────
 COMBOS = [
-    ("custom", "metropolis",          "full"),
-    ("dimod",  "simulated_annealing", "full"),
-    ("dimod",  "zephyr",              "zephyr"),
-    ("custom", "sbm",                 "zephyr"),
+    ("custom", "metropolis", "zephyr"),
+    ("dimod", "simulated_annealing", "zephyr"),
+    ("dimod", "zephyr", "zephyr"),
+    ("custom", "sbm", "zephyr"),
 ]
 
 # ── fixed hyperparameters ─────────────────────────────────────────────────────
-N_NH_STEPS  = 1      # n_hidden = n_visible (α = 1)
-ITERATIONS  = 300
-_REG        = 1e-5
-_NS         = 1000
+N_NH_STEPS = 1  # n_hidden = n_visible (α = 1)
+ITERATIONS = 300
+_REG = 1e-5
+_NS = 1000
 
 # ── optimal SBM config (from sbm_tune analysis) ───────────────────────────────
-SB_MODE      = "discrete"   # beats ballistic at equal step budget
-SB_HEATED    = False        # heated consistently hurts
-SB_MAX_STEPS = 500          # sweet spot: best reach-rate, zero divergence
+SB_MODE = "discrete"  # beats ballistic at equal step budget
+SB_HEATED = False  # heated consistently hurts
+SB_MAX_STEPS = 500  # sweet spot: best reach-rate, zero divergence
 
 MAX_RETRIES = 2
 
@@ -130,19 +130,21 @@ def build_experiments() -> list[dict]:
                     for h in H_VALUES:
                         for lr in LEARNING_RATES:
                             for seed in SEEDS:
-                                experiments.append({
-                                    "model":     model,
-                                    "size":      size,
-                                    "n_visible": n_visible,
-                                    "n_hidden":  n_hidden,
-                                    "alpha":     n_hidden / n_visible,
-                                    "h":         h,
-                                    "lr":        lr,
-                                    "seed":      seed,
-                                    "sampler":   sampler,
-                                    "method":    method,
-                                    "rbm":       rbm,
-                                })
+                                experiments.append(
+                                    {
+                                        "model": model,
+                                        "size": size,
+                                        "n_visible": n_visible,
+                                        "n_hidden": n_hidden,
+                                        "alpha": n_hidden / n_visible,
+                                        "h": h,
+                                        "lr": lr,
+                                        "seed": seed,
+                                        "sampler": sampler,
+                                        "method": method,
+                                        "rbm": rbm,
+                                    }
+                                )
     return experiments
 
 
@@ -198,23 +200,37 @@ def run_experiment(exp: dict, idx: int, total: int, dry_run: bool) -> bool:
     log(label)
 
     cmd = [
-        "python3", SCRIPT,
-        "--model",       exp["model"],
-        "--size",        str(exp["size"]),
-        "--n-hidden",    str(exp["n_hidden"]),
-        "--h",           str(exp["h"]),
-        "--lr",          str(exp["lr"]),
-        "--sampler",     exp["sampler"],
-        "--method",      exp["method"],
-        "--rbm",         exp["rbm"],
-        "--iterations",  str(ITERATIONS),
-        "--seed",        str(exp["seed"]),
-        "--output-dir",  OUTPUT_DIR,
+        "python3",
+        SCRIPT,
+        "--model",
+        exp["model"],
+        "--size",
+        str(exp["size"]),
+        "--n-hidden",
+        str(exp["n_hidden"]),
+        "--h",
+        str(exp["h"]),
+        "--lr",
+        str(exp["lr"]),
+        "--sampler",
+        exp["sampler"],
+        "--method",
+        exp["method"],
+        "--rbm",
+        exp["rbm"],
+        "--iterations",
+        str(ITERATIONS),
+        "--seed",
+        str(exp["seed"]),
+        "--output-dir",
+        OUTPUT_DIR,
     ]
     if exp["method"] == "sbm":
         cmd += [
-            "--sb-mode",      SB_MODE,
-            "--sb-max-steps", str(SB_MAX_STEPS),
+            "--sb-mode",
+            SB_MODE,
+            "--sb-max-steps",
+            str(SB_MAX_STEPS),
         ]
         if SB_HEATED:
             cmd += ["--sb-heated"]
@@ -294,7 +310,9 @@ def main():
     log(f"H values                : {H_VALUES}")
     for sampler, method, rbm in COMBOS:
         log(f"Combo                   : {sampler}/{method}  rbm={rbm}")
-    log(f"SBM config              : mode={SB_MODE}  heated={SB_HEATED}  max_steps={SB_MAX_STEPS}")
+    log(
+        f"SBM config              : mode={SB_MODE}  heated={SB_HEATED}  max_steps={SB_MAX_STEPS}"
+    )
     log(f"Iterations              : {ITERATIONS}  seeds={SEEDS}")
     if args.dry_run:
         log("DRY RUN — no experiments will be executed")
