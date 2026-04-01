@@ -125,6 +125,8 @@ def main():
         "n_samples": 1000,
         "regularization": 1e-3,
         "stop_at_convergence": False,
+        "save_checkpoints": True,
+        "checkpoint_interval": 10,
     }
 
     ns_args = Namespace(
