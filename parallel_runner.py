@@ -32,7 +32,7 @@ LOG_FILE = "parallel_benchmark.log"
 SCRIPT = "src/single_experiment.py"
 
 # ── sweep axes ────────────────────────────────────────────────────────────────
-SIZES_1D = [96, 128, 192, 256]
+SIZES_1D = [128, 192, 256]
 SIZES_2D = [12, 14, 16]  # not running 2D in this sweep
 H_VALUES = [0.5, 1.0, 2.0]
 LEARNING_RATES = [0.1]
@@ -54,7 +54,7 @@ SB_MODE = "discrete"  # beats ballistic at equal step budget
 SB_HEATED = False  # heated consistently hurts
 SB_MAX_STEPS = 500  # sweet spot: best reach-rate, zero divergence
 
-DWAVE_BUDGET_MS = 1_800_000  # 30 minutes in ms
+DWAVE_BUDGET_MS = 3_600_000  # 30 minutes in ms
 TIME_FILE = Path("time.json")
 
 MAX_RETRIES = 2
